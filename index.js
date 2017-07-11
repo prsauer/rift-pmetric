@@ -14,8 +14,8 @@ app.set('port', (process.env.PORT || 5000));
 app.use(express.static(__dirname + '/public'));
 
 // views is directory for all template files
-app.set('views', __dirname + '/views');
-app.set('view engine', 'ejs');
+//app.set('views', __dirname + '/views');
+//app.set('view engine', 'ejs');
 
 function riotGet(path) {
   var options = {
@@ -65,7 +65,7 @@ app.get('/stats', function(request, response) {
       }
       cs = cs/items.length;
       statsCollection.update({summonerName: {$eq: 'xbanthur'}}, {'summonerName': 'xbanthur', 'csAvg': cs}, {upsert: true});
-      response.send('!'+cs);
+      response.send({cs});
   });
 });
 
@@ -118,6 +118,10 @@ app.get('/load', function(request, response) {
       }
     });
   // response.render('pages/index');
+});
+
+app.get('*', function(request, response) {
+  response.sendFile('public/index.html', {"root": __dirname});
 });
 
 db.connect(MONGO_URL, function(err) {
