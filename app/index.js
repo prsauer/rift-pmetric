@@ -26,7 +26,7 @@ const About = () => (
 
 const Topic = ({ match }) => (
   <div>
-    <AApp />
+    <AApp match={match}/>
   </div>
 )
 

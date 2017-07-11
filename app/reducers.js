@@ -1,15 +1,15 @@
 import { combineReducers } from 'redux'
 import {
-  SELECT_SUBREDDIT,
-  INVALIDATE_SUBREDDIT,
+  SELECT_SUMMONER,
+  INVALIDATE_SUMMONER,
   REQUEST_STATS,
   RECEIVE_STATS
 } from './actions/actions'
 
-function selectedSubreddit(state = 'reactjs', action) {
+function selectedSummoner(state = '', action) {
   switch (action.type) {
-    case SELECT_SUBREDDIT:
-      return action.subreddit
+    case SELECT_SUMMONER:
+      return action.summoner
     default:
       return state
   }
@@ -24,7 +24,7 @@ function stats(
   action
 ) {
   switch (action.type) {
-    case INVALIDATE_SUBREDDIT:
+    case INVALIDATE_SUMMONER:
       return Object.assign({}, state, {
         didInvalidate: true
       })
@@ -45,13 +45,13 @@ function stats(
   }
 }
 
-function statsBySubreddit(state = {}, action) {
+function statsBySummoner(state = {}, action) {
   switch (action.type) {
-    case INVALIDATE_SUBREDDIT:
+    case INVALIDATE_SUMMONER:
     case RECEIVE_STATS:
     case REQUEST_STATS:
       return Object.assign({}, state, {
-        [action.subreddit]: stats(state[action.subreddit], action)
+        [action.summoner]: stats(state[action.summoner], action)
       })
     default:
       return state
@@ -59,8 +59,8 @@ function statsBySubreddit(state = {}, action) {
 }
 
 const rootReducer = combineReducers({
-  statsBySubreddit,
-  selectedSubreddit
+  statsBySummoner,
+  selectedSummoner
 })
 
 export default rootReducer

@@ -2,50 +2,50 @@ import fetch from 'isomorphic-fetch'
 
 export const REQUEST_STATS = 'REQUEST_STATS'
 export const RECEIVE_STATS = 'RECEIVE_STATS'
-export const SELECT_SUBREDDIT = 'SELECT_SUBREDDIT'
-export const INVALIDATE_SUBREDDIT = 'INVALIDATE_SUBREDDIT'
+export const SELECT_SUMMONER = 'SELECT_SUMMONER'
+export const INVALIDATE_SUMMONER = 'INVALIDATE_SUMMONERT'
 
-export function selectSubreddit(subreddit) {
+export function selectSummoner(summoner) {
   return {
-    type: SELECT_SUBREDDIT,
-    subreddit
+    type: SELECT_SUMMONER,
+    summoner
   }
 }
 
-export function invalidateSubreddit(subreddit) {
+export function invalidateSummoner(summoner) {
   return {
-    type: INVALIDATE_SUBREDDIT,
-    subreddit
+    type: INVALIDATE_SUMMONER,
+    summoner
   }
 }
 
-function requestStats(subreddit) {
+function requestStats(summoner) {
   return {
     type: REQUEST_STATS,
-    subreddit
+    summoner
   }
 }
 
-function receiveStats(subreddit, json) {
+function receiveStats(summoner, json) {
   return {
     type: RECEIVE_STATS,
-    subreddit,
+    summoner,
     stats: [json,],
     receivedAt: Date.now()
   }
 }
 
-function fetchStats(subreddit) {
+function fetchStats(summoner) {
   return dispatch => {
-    dispatch(requestStats(subreddit))
+    dispatch(requestStats(summoner))
     return fetch(`/stats`)
       .then(response => response.json())
-      .then(json => dispatch(receiveStats(subreddit, json)))
+      .then(json => dispatch(receiveStats(summoner, json)))
   }
 }
 
-function shouldFetchStats(state, subreddit) {
-  const STATS = state.statsBySubreddit[subreddit]
+function shouldFetchStats(state, summoner) {
+  const STATS = state.statsBySummoner[summoner]
   if (!STATS) {
     return true
   } else if (STATS.isFetching) {
@@ -55,10 +55,10 @@ function shouldFetchStats(state, subreddit) {
   }
 }
 
-export function fetchStatsIfNeeded(subreddit) {
+export function fetchStatsIfNeeded(summoner) {
   return (dispatch, getState) => {
-    if (shouldFetchStats(getState(), subreddit)) {
-      return dispatch(fetchStats(subreddit))
+    if (shouldFetchStats(getState(), summoner)) {
+      return dispatch(fetchStats(summoner))
     }
   }
 }

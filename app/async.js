@@ -2,10 +2,11 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import {
-  selectSubreddit,
+  selectSummoner,
   fetchStatsIfNeeded,
-  invalidateSubreddit
+  invalidateSummoner
 } from './actions/actions'
+import { withRouter } from 'react-router-dom'
 
 class ShowStat extends Component {
   render() {
@@ -27,39 +28,42 @@ class AsyncApp extends Component {
   }
 
   componentDidMount() {
-    const { dispatch, selectedSubreddit } = this.props
-    dispatch(fetchStatsIfNeeded(selectedSubreddit))
-  }
-
-  componentDidUpdate(prevProps) {
-    if (this.props.selectedSubreddit !== prevProps.selectedSubreddit) {
-      const { dispatch, selectedSubreddit } = this.props
-      dispatch(fetchStatsIfNeeded(selectedSubreddit))
+    console.log("Mounted with", this.props);
+    const { dispatch, selectedSummoner } = this.props
+    if (this.props.match.topicId != selectedSummoner) {
+      dispatch(selectSummoner(this.props.match.params.topicId))
+    }
+    else {
+      dispatch(fetchStatsIfNeeded(selectedSummoner))      
     }
   }
 
-  handleChange(nextSubreddit) {
-    this.props.dispatch(selectSubreddit(nextSubreddit))
-    this.props.dispatch(fetchStatsIfNeeded(nextSubreddit))
+  componentDidUpdate(prevProps) {
+    if (this.props.selectedSummoner !== prevProps.selectedSummoner) {
+      const { dispatch, selectedSummoner } = this.props
+      dispatch(fetchStatsIfNeeded(selectedSummoner))
+    }
+  }
+
+  handleChange(nextSummoner) {
+    this.props.dispatch(selectSummoner(nextSummoner))
+    this.props.dispatch(fetchStatsIfNeeded(nextSummoner))
   }
 
   handleRefreshClick(e) {
     e.preventDefault()
 
-    const { dispatch, selectedSubreddit } = this.props
-    dispatch(invalidateSubreddit(selectedSubreddit))
-    dispatch(fetchStatsIfNeeded(selectedSubreddit))
+    const { dispatch, selectedSummoner } = this.props
+    dispatch(invalidateSummoner(selectedSummoner))
+    dispatch(fetchStatsIfNeeded(selectedSummoner))
   }
 
   render() {
-    const { selectedSubreddit, stats, isFetching, lastUpdated } = this.props
+    const { selectedSummoner, stats, isFetching, lastUpdated } = this.props
     return (
       <div>
         <div
-          value={selectedSubreddit}
-          onChange={this.handleChange}
-          options={['reactjs', 'frontend']}
-        />
+        >{selectedSummoner}</div>
         <p>
           {lastUpdated &&
             <span>
@@ -83,7 +87,7 @@ class AsyncApp extends Component {
 }
 
 AsyncApp.propTypes = {
-  selectedSubreddit: PropTypes.string.isRequired,
+  selectedSummoner: PropTypes.string.isRequired,
   stats: PropTypes.array.isRequired,
   isFetching: PropTypes.bool.isRequired,
   lastUpdated: PropTypes.number,
@@ -91,18 +95,18 @@ AsyncApp.propTypes = {
 }
 
 function mapStateToProps(state) {
-  const { selectedSubreddit, statsBySubreddit } = state
+  const { selectedSummoner, statsBySummoner } = state
   const {
     isFetching,
     lastUpdated,
     items: stats
-  } = statsBySubreddit[selectedSubreddit] || {
+  } = statsBySummoner[selectedSummoner] || {
     isFetching: true,
     items: []
   }
 
   return {
-    selectedSubreddit,
+    selectedSummoner,
     stats,
     isFetching,
     lastUpdated
