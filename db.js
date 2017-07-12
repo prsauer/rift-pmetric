@@ -1,14 +1,17 @@
 var MongoClient = require('mongodb').MongoClient
 
+MONGO_URL = process.env.MONGODB_URI;
+
 var state = {
   db: null,
 }
 
-exports.connect = function(url, done) {
+exports.connect = function(done) {
   if (state.db) return done()
 
-  MongoClient.connect(url, function(err, db) {
+  MongoClient.connect(MONGO_URL, function(err, db) {
     if (err) return done(err)
+    console.log("Database connection open...");
     state.db = db
     done()
   })
