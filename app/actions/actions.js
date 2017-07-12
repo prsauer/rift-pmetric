@@ -38,7 +38,7 @@ function receiveStats(summoner, json) {
 function fetchStats(summoner) {
   return dispatch => {
     dispatch(requestStats(summoner))
-    return fetch(`/stats`)
+    return fetch(`/stats/${summoner}`)
       .then(response => response.json())
       .then(json => dispatch(receiveStats(summoner, json)))
   }

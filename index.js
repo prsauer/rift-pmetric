@@ -18,8 +18,9 @@ app.use(express.static(__dirname + '/public'));
 //app.set('views', __dirname + '/views');
 //app.set('view engine', 'ejs');
 
-app.get('/stats', function(request, response) {
-  var name = 'tendercrisp';
+app.get('/stats/:name', function(request, response) {
+  var name = request.params.name;
+  console.log("Collecting stats for",name);
   db.get().createCollection('stats');
   var statsCollection = db.get().collection('stats');
   var collection = db.get().collection('matches');
