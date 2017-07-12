@@ -49,7 +49,7 @@ app.get('/stats/:name', function(request, response) {
     if (items.length !== 1) {
       response.send(400);
     }
-    delete items[0]._id; // Don't serve MongoDB internal id
+    // delete items[0]._id; // Don't serve MongoDB internal id
     response.send(items[0]);
   });
 });
