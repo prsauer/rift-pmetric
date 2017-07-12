@@ -78,6 +78,17 @@ function avgCSd10(matches) {
   return c/n;
 }
 
+function averagesForNumbers(tree, mapping) {
+  var averages = [];
+  for(let i = 0; i < Object.keys(mapping).length; i++) {
+    var path = Object.keys(mapping)[i];
+    if (mapping[path] == 'number') {
+      averages.push(['Average ' + path, averageWithPath(tree, path)])
+    }
+  }
+  return averages;
+}
+
 function fWins(matches) {
   return matches.filter((m) => m.participant.stats.win);
 }
@@ -105,17 +116,12 @@ class ShowStat extends Component {
           max = Object.keys(new_map).length;
         }
       }
-      var averages = [];
-      for(let i = 0; i < Object.keys(mapping).length; i++) {
-        var path = Object.keys(mapping)[i];
-        if (mapping[path] == 'number') {
-          console.log("Computing average", path);          
-          averages.push(['Average ' + path, averageWithPath(this.props.stats[0].metrics.matches, path)])
-        }
-      }
+      var averages = averagesForNumbers(this.props.stats[0].metrics.matches, mapping);
+      var average_w = averagesForNumbers(fWins(this.props.stats[0].metrics.matches), mapping);
+      var average_l = averagesForNumbers(fLoss(this.props.stats[0].metrics.matches), mapping);
       console.log(averages);
     }
-    
+
     if (this.props.stats.length > 0) {
       return (
           <div>
@@ -128,8 +134,17 @@ class ShowStat extends Component {
             <div>Average CS on Win: { avgCS(fWins(this.props.stats[0].metrics.matches)) }</div>
             <div>Average CS on Lose: { avgCS(fLoss(this.props.stats[0].metrics.matches)) }</div>
 
+            <h3>Averages</h3>
             { averages.map((el) => {
               return (<div>{ el[0] }  { el[1] }</div>)
+            })}
+            <h3>Average Win</h3>
+            { average_w.map((el) => {
+              return (<div> W { el[0] }  { el[1] }</div>)
+            })}
+            <h3>Average Loss</h3>
+            { average_l.map((el) => {
+              return (<div> L { el[0] }  { el[1] }</div>)
             })}
           </div>
           )
