@@ -46,10 +46,10 @@ app.get('/stats/:name', function(request, response) {
   var statsCollection = db.get().collection('stats');
   statsCollection.find({'summonerName_lower': {$eq: name}})
   .toArray(function(err, items) {
-    if (items.length !== 1) {
+    if (items.length != 1) {
       response.send(400);
     }
-    // delete items[0]._id; // Don't serve MongoDB internal id
+    delete items[0]._id; // Don't serve MongoDB internal id
     response.send(items[0]);
   });
 });
