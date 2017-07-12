@@ -13,7 +13,11 @@ class ShowStat extends Component {
     console.log(this.props.stats);
     if (this.props.stats.length > 0) {
       return (
-            <div>Stats: { this.props.stats[0].cs }</div>
+          <div>
+            <div>CS Average: { this.props.stats[0].metrics.cs.mean }</div>
+            <div>CSd10 Average: { this.props.stats[0].metrics.csd10.mean }</div>
+            <div>Dump: { JSON.stringify(this.props.stats[0].metrics) }</div>
+          </div>
           )
     }
     return (<div>Loading</div>);
@@ -76,7 +80,6 @@ class AsyncApp extends Component {
             </a>}
         </p>
         {isFetching && <h2>Loading...</h2>}
-        {!isFetching && <h2>Empty.</h2>}
         {
           <div style={{ opacity: isFetching ? 0.5 : 1 }}>
             <ShowStat stats={stats} />

@@ -8,6 +8,7 @@ var queue = new Queue(1, 1000);
 
 // Retrieve
 var db = require('./db');
+var stats = require('./stats');
 var api = require('./api/riot');
 
 app.set('port', (process.env.PORT || 5000));
@@ -18,45 +19,40 @@ app.use(express.static(__dirname + '/public'));
 //app.set('views', __dirname + '/views');
 //app.set('view engine', 'ejs');
 
-app.get('/stats/:name', function(request, response) {
+app.get('/stats_write/:name', function(request, response) {
   var name = request.params.name;
-  console.log("Collecting stats for",name);
+  console.log("Writing stats for",name);
   db.get().createCollection('stats');
   var statsCollection = db.get().collection('stats');
   var collection = db.get().collection('matches');
   collection.find({
       'participantIdentities.player.summonerName': {$eq: name}
     }).toArray(function(err, items) {
-      cs = 0;
-      for(let i = 0; i < items.length; i++) {
-        m1 = matchStatsOfPlayer(items[i], name);
-        cs += m1.totalMinionsKilled;
-        console.log(m1);
-        // response.send(matchStatsOfPlayer(m1, name));
-      }
-      cs = cs/items.length;
-      statsCollection.update({summonerName: {$eq: name}}, {'summonerName': name, 'csAvg': cs}, {upsert: true});
-      response.send({cs});
+      metrics = stats.computeStats(name, items);
+      statsCollection.update(
+        { summonerName_lower: { $eq: name.toLocaleLowerCase() } },
+        {
+          'summonerName': name,
+          'summonerName_lower': name.toLocaleLowerCase(),
+          'metrics': metrics,
+        },
+        { upsert: true });
+      response.send(metrics);
   });
 });
 
-function matchStatsOfPlayer(match, name) {
-  var pid = -1;
-  for(let i = 0; i < match.participantIdentities.length; i++) {
-    if (match.participantIdentities[i].player.summonerName == name) {
-      pid = match.participantIdentities[i].participantId;
-      break;
+app.get('/stats/:name', function(request, response) {
+  var name = request.params.name.toLocaleLowerCase();
+  var statsCollection = db.get().collection('stats');
+  statsCollection.find({'summonerName_lower': {$eq: name}})
+  .toArray(function(err, items) {
+    if (items.length !== 1) {
+      response.send(400);
     }
-  }
-  var slice = {};
-  for(let i = 0; i < match.participants.length; i++) {
-    if (match.participants[i].participantId == pid) {
-      slice = match.participants[i];
-      break;
-    }
-  }
-  return slice.stats;
-}
+    delete items[0]._id; // Don't serve MongoDB internal id
+    response.send(items[0]);
+  });
+});
 
 function grabIt(matchId) {
   matches = db.get().collection('matches');
