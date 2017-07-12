@@ -8,15 +8,119 @@ import {
 } from './actions/actions'
 import { withRouter } from 'react-router-dom'
 
+function DFS(obj, path, store) {
+  if (typeof(obj) == 'string') {
+    store[path] = 'string'
+  } else if (Array.isArray(obj)) {
+    store[path] = 'array';
+    for(let i = 0; i < obj.length; i++) {
+      DFS(obj[i], path + '.' + i, store);
+    }
+  } else if (typeof(obj) == 'object') {
+    store[path] = 'object';
+    for(let i = 0; i < Object.keys(obj).length; i++) {
+      DFS(obj[Object.keys(obj)[i]], path + '.' + Object.keys(obj)[i], store);
+    }
+  } else if (typeof(obj) == 'number') {
+    store[path] = 'number';
+  }
+  else {
+    store[path] = 'unknown';    
+  }
+  return
+}
+
+function getLeafWithPath(obj, path) {
+  var keys = path.split('.')
+  var into = obj;
+  for(var i = 1; i < keys.length; i++) {
+    if (into === undefined) {
+      return undefined;
+    }
+    into = into[keys[i]];
+  }
+  return into
+}
+
+function averageWithPath(matches, path) {
+  var n = 0;
+  var s = 0;
+  for(var i = 0; i < matches.length; i++) {
+    var v = getLeafWithPath(matches[i], path)
+    if (path == 'match.playerTimeline0.totalGold') {
+      console.log(v);
+    }
+    if (v != undefined) {
+      s += v;
+      n++;
+    }
+  }
+  return s/n;
+}
+
+function avgCS(matches) {
+  var cs = 0;
+  for(var i = 0; i < matches.length; i++) {
+    cs += matches[i].participant.stats.totalMinionsKilled;
+  }
+  return cs/matches.length;
+}
+
+function avgCSd10(matches) {
+  var c = 0;
+  var n = 0;
+  for(var i = 0; i < matches.length; i++) {
+    if (matches[i].participant.timeline.csDiffPerMinDeltas !== undefined) {
+      c += 10*matches[i].participant.timeline.csDiffPerMinDeltas['0-10'];
+      n++;
+    }
+  }
+  return c/n;
+}
+
+function fWins(matches) {
+  return matches.filter((m) => m.participant.stats.win);
+}
+
+function fLoss(matches) {
+  return matches.filter((m) => !m.participant.stats.win);
+}
+
 class ShowStat extends Component {
   render() {
-    console.log(this.props.stats);
+    if (this.props.stats.length > 0) {
+      var mapping = {};
+      var single_match = this.props.stats[0].metrics.matches[0]
+      DFS(single_match, 'match', mapping);
+      console.log(getLeafWithPath(single_match, 'match.participant.championId'))
+      console.log(mapping);
+
+      var averages = [];
+      for(let i = 0; i < Object.keys(mapping).length; i++) {
+        var path = Object.keys(mapping)[i];
+        if (mapping[path] == 'number') {
+          console.log("Computing average", path);          
+          averages.push(['Average ' + path, averageWithPath(this.props.stats[0].metrics.matches, path)])
+        }
+      }
+      console.log(averages);
+    }
+    
     if (this.props.stats.length > 0) {
       return (
           <div>
             <div>CS Average: { this.props.stats[0].metrics.cs.mean }</div>
             <div>CSd10 Average: { this.props.stats[0].metrics.csd10.mean }</div>
-            <div>Dump: { JSON.stringify(this.props.stats[0].metrics) }</div>
+
+            <div>Average CSd10 on Win: { avgCSd10(fWins(this.props.stats[0].metrics.matches)) }</div>
+            <div>Average CSd10 on Lose: { avgCSd10(fLoss(this.props.stats[0].metrics.matches)) }</div>
+
+            <div>Average CS on Win: { avgCS(fWins(this.props.stats[0].metrics.matches)) }</div>
+            <div>Average CS on Lose: { avgCS(fLoss(this.props.stats[0].metrics.matches)) }</div>
+
+            { averages.map((el) => {
+              return (<div>{ el[0] }  { el[1] }</div>)
+            })}
           </div>
           )
     }
