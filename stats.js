@@ -17,23 +17,40 @@ function matchStatsOfPlayer(match, name) {
   return slice;
 }
 
+function getPlayerFrame(frames, id) {
+  return Object.values(frames).find((el) => (el.participantId == id));
+}
+
 exports.computeStats = function(name, matches) {
   stats = {
-    cs: { sum: 0, mean: 0, n: 0, vals: [] },
-    csd10: { sum: 0, mean: 0, n: 0, vals: [] },
+    cs: { sum: 0, mean: 0, n: 0 },
+    csd10: { sum: 0, mean: 0, n: 0 },
+    matches: [],
   };
   for(let i = 0; i < matches.length; i++) {
-    m1 = matchStatsOfPlayer(matches[i], name);
-    match = {gameId: matches[i].gameId, gameCreation: matches[i].gameCreation};
-    console.log("Analyze",match);
-    stats.cs.sum += m1.stats.totalMinionsKilled;
-    stats.cs.vals.push([match, m1.stats.totalMinionsKilled]);
+    participantData = matchStatsOfPlayer(matches[i], name);
+    match = {
+      gameId: matches[i].gameId,
+      gameCreation: matches[i].gameCreation,
+      participant: participantData,
+    };
+    match.cs = participantData.stats.totalMinionsKilled;
+    stats.cs.sum += participantData.stats.totalMinionsKilled;
     stats.cs.n++;
-    if (m1.timeline.csDiffPerMinDeltas !== undefined) {
-      stats.csd10.sum += m1.timeline.csDiffPerMinDeltas['0-10'];
-      stats.csd10.vals.push([match, m1.timeline.csDiffPerMinDeltas['0-10']]);
+    if (participantData.timeline.csDiffPerMinDeltas !== undefined) {
+      match.csd10 = participantData.timeline.csDiffPerMinDeltas['0-10'];
+      stats.csd10.sum += participantData.timeline.csDiffPerMinDeltas['0-10'];
       stats.csd10.n++;
     }
+    if (matches[i].timeline.frames !== undefined) {
+      console.log("FRAMES", matches[i].timeline.frames);
+      match.playerTimeline = matches[i].timeline.frames.map((frame) => {
+        let f = getPlayerFrame(frame.participantFrames, participantData.participantId);
+        f.trimestamp = frame.timestamp;
+        return f;
+      });
+    }
+    stats.matches.push(match);
   }
   stats.csd10.mean = 10.0*stats.csd10.sum/stats.csd10.n;
   stats.cs.mean = stats.cs.sum/stats.cs.n;

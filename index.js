@@ -5,6 +5,9 @@ var sleep = require('sleep');
 var Queue = require('promise-queue');
 
 var queue = new Queue(1, 1000);
+var compression = require('compression');
+
+app.use(compression());
 
 // Retrieve
 var db = require('./db');
@@ -42,6 +45,7 @@ app.get('/stats_write/:name', function(request, response) {
 });
 
 app.get('/stats/:name', function(request, response) {
+  response.setHeader('Cache-Control', 'no-cache')
   var name = request.params.name.toLocaleLowerCase();
   var statsCollection = db.get().collection('stats');
   statsCollection.find({'summonerName_lower': {$eq: name}})
@@ -61,10 +65,12 @@ function grabIt(matchId) {
       console.log("Qing", matchId);
       queue.add(function() {
         console.log("Fetching", matchId, queue.getQueueLength(), "remain");        
-        return api.getMatchData(matchId).then((matchData) => {
-          if(!err) {
-            matches.insert(matchData, {w:1}, function(err, result) {});
-          }
+        return Promise.all([api.getMatchData(matchId), api.getMatchTimeline(matchId)])
+          .then((matchData) => {
+            matchData[0].timeline = matchData[1]
+            if(!err) {
+              matches.insert( matchData[0], {w:1}, function(err, result) {});
+            }
         });
       });
     } else {
@@ -73,8 +79,9 @@ function grabIt(matchId) {
   });
 }
 
-app.get('/load', function(request, response) {
-    api.getSummonerId('xbanthur')
+app.get('/load/:name', function(request, response) {
+    var name = request.params.name;
+    api.getSummonerId(name)
     .then((accountId) => {
         return api.getRecentMatchIds(accountId);
     }).then((matchIds) => {
