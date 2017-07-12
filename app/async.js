@@ -119,6 +119,28 @@ class ShowStat extends Component {
       var averages = averagesForNumbers(this.props.stats[0].metrics.matches, mapping);
       var average_w = averagesForNumbers(fWins(this.props.stats[0].metrics.matches), mapping);
       var average_l = averagesForNumbers(fLoss(this.props.stats[0].metrics.matches), mapping);
+      var merged = [];
+
+      for(let i = 0; i < averages.length; i++) {
+        var key = averages[i][0];
+        var w_data = undefined;
+        var l_data = undefined;
+        if (average_w[i][0] === key) {
+          w_data = average_w[i][1];
+        }
+        if (average_l[i][0] === key) {
+          l_data = average_l[i][1];
+        }
+        merged.push(
+          [
+            key,
+            averages[i][1],
+            w_data,
+            l_data,
+            w_data - l_data,
+          ]
+        );
+      }
       console.log(averages);
     }
 
@@ -133,19 +155,23 @@ class ShowStat extends Component {
 
             <div>Average CS on Win: { avgCS(fWins(this.props.stats[0].metrics.matches)) }</div>
             <div>Average CS on Lose: { avgCS(fLoss(this.props.stats[0].metrics.matches)) }</div>
-
             <h3>Averages</h3>
-            { averages.map((el) => {
-              return (<div>{ el[0] }  { el[1] }</div>)
+            <table>
+              <thead>
+                <tr>
+                  <td>Name</td>
+                  <td>Average</td>
+                  <td>Avg Win</td>
+                  <td>Avg Loss</td>
+                  <td>AvgW - AvgL</td>
+                  </tr>
+                </thead>
+                <tbody>
+            { merged.map((el) => {
+              return (<tr><td>{el[0]}</td><td>{el[1]}</td><td>{el[2]}</td><td>{el[3]}</td><td>{el[4]}</td></tr>)
             })}
-            <h3>Average Win</h3>
-            { average_w.map((el) => {
-              return (<div> W { el[0] }  { el[1] }</div>)
-            })}
-            <h3>Average Loss</h3>
-            { average_l.map((el) => {
-              return (<div> L { el[0] }  { el[1] }</div>)
-            })}
+            </tbody>
+            </table>
           </div>
           )
     }

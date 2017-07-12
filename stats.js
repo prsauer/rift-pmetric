@@ -33,6 +33,7 @@ exports.computeStats = function(name, matches) {
       gameId: matches[i].gameId,
       gameCreation: matches[i].gameCreation,
       participant: participantData,
+      gameDuration: matches[i].gameDuration,
     };
     match.cs = participantData.stats.totalMinionsKilled;
     stats.cs.sum += participantData.stats.totalMinionsKilled;
@@ -43,7 +44,6 @@ exports.computeStats = function(name, matches) {
       stats.csd10.n++;
     }
     if (matches[i].timeline.frames !== undefined) {
-      console.log("FRAMES", matches[i].timeline.frames);
       match.playerTimeline = matches[i].timeline.frames.map((frame) => {
         let f = getPlayerFrame(frame.participantFrames, participantData.participantId);
         f.timestamp = frame.timestamp;
