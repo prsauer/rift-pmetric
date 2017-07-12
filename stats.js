@@ -46,7 +46,7 @@ exports.computeStats = function(name, matches) {
       console.log("FRAMES", matches[i].timeline.frames);
       match.playerTimeline = matches[i].timeline.frames.map((frame) => {
         let f = getPlayerFrame(frame.participantFrames, participantData.participantId);
-        f.trimestamp = frame.timestamp;
+        f.timestamp = frame.timestamp;
         return f;
       });
     }

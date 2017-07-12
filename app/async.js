@@ -95,6 +95,16 @@ class ShowStat extends Component {
       console.log(getLeafWithPath(single_match, 'match.participant.championId'))
       console.log(mapping);
 
+      // Find best mapping
+      var max = -1;
+      for(let i = 0; i < this.props.stats[0].metrics.matches.length; i++) {
+        var new_map = {};
+        DFS(this.props.stats[0].metrics.matches[i], 'match', new_map);
+        if (Object.keys(new_map).length > max) {
+          mapping = new_map;
+          max = Object.keys(new_map).length;
+        }
+      }
       var averages = [];
       for(let i = 0; i < Object.keys(mapping).length; i++) {
         var path = Object.keys(mapping)[i];
