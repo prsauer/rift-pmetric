@@ -64,6 +64,9 @@ function DFS(obj, path, store) {
   if (path.search("teamScore") > -1) {
     return;
   }
+  if (path.search("gameCreation") > -1) {
+    return;
+  }
   if (typeof(obj) == 'string') {
     store[path] = 'string'
   } else if (Array.isArray(obj)) {
