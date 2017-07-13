@@ -229,11 +229,11 @@ class ShowStat extends Component {
         merged.push(
           [
             key,
-            averages[i][1],
-            w_data,
-            l_data,
+            Math.round(averages[i][1]*10)/10.0,
+            Math.round(w_data*10)/10.0,
+            Math.round(l_data*10)/10.0,
             Math.round(c_data*100, -3)/100.0,
-            w_data - l_data,
+            Math.round((w_data - l_data)*10)/10.0,
           ]
         );
       }
