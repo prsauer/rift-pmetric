@@ -87,13 +87,15 @@ function getLeafWithPath(obj, path) {
 
 function corrWithPath(matches, path, variate) {
   var s = [];
+  var w = [];
   for(var i = 0; i < matches.length; i++) {
     var v = getLeafWithPath(matches[i], path)
     if (v != undefined) {
       s.push(v);
+      w.push(matches[i].participant.stats.win);
     }
   }
-  return corr(s, variate);
+  return corr(s, w);
 }
 
 function averageWithPath(matches, path) {
@@ -132,12 +134,12 @@ function avgCSd10(matches) {
   return c/n;
 }
 
-function corrForNumbers(tree, mapping, variate) {
+function corrForNumbers(tree, mapping) {
   var data = [];
   for(let i = 0; i < Object.keys(mapping).length; i++) {
     var path = Object.keys(mapping)[i];
     if (mapping[path] == 'number') {
-      data.push(corrWithPath(tree, path, variate));
+      data.push(corrWithPath(tree, path));
     }
   }
   return data;
@@ -185,7 +187,7 @@ class ShowStat extends Component {
         }
       }
       var averages = averagesForNumbers(this.props.stats[0].metrics.matches, mapping);
-      var correlates = corrForNumbers(this.props.stats[0].metrics.matches, mapping, w_array);
+      var correlates = corrForNumbers(this.props.stats[0].metrics.matches, mapping);
       var average_w = averagesForNumbers(fWins(this.props.stats[0].metrics.matches), mapping);
       var average_l = averagesForNumbers(fLoss(this.props.stats[0].metrics.matches), mapping);
       var merged = [];
