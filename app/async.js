@@ -52,6 +52,18 @@ function corr(x, y) {
 }
 
 function DFS(obj, path, store) {
+  if (path.search("Id") > -1) {
+    return;
+  }
+  if (path.search("timestamp") > -1) {
+    return;
+  }
+  if (path.search("gameScore") > -1) {
+    return;
+  }
+  if (path.search("teamScore") > -1) {
+    return;
+  }
   if (typeof(obj) == 'string') {
     store[path] = 'string'
   } else if (Array.isArray(obj)) {
@@ -150,7 +162,7 @@ function averagesForNumbers(tree, mapping) {
   for(let i = 0; i < Object.keys(mapping).length; i++) {
     var path = Object.keys(mapping)[i];
     if (mapping[path] == 'number') {
-      averages.push(['Average ' + path, averageWithPath(tree, path)])
+      averages.push([path, averageWithPath(tree, path)])
     }
   }
   return averages;
