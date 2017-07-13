@@ -164,9 +164,20 @@ function fLoss(matches) {
   return matches.filter((m) => !m.participant.stats.win);
 }
 
+function attach_stat(matches, name, gen) {
+  for(let i = 0; i < matches.length; i++) {
+    matches[i][name] = gen(matches[i])
+  }
+}
+
+function gpm(match) {
+  return match.participant.stats.goldEarned / match.gameDuration;
+}
+
 class ShowStat extends Component {
   render() {
     if (this.props.stats.length > 0) {
+      attach_stat(this.props.stats[0].metrics.matches, 'gpm', gpm);
       var cs_array = this.props.stats[0].metrics.matches.map((el) => el.participant.stats.totalMinionsKilled);
       var w_array = this.props.stats[0].metrics.matches.map((el) => el.participant.stats.win ? 1 : -1);
       console.log("CORR", corr(cs_array, w_array));
