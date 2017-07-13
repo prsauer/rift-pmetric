@@ -2,9 +2,7 @@ var express = require('express');
 var app = express();
 var fetch = require('node-fetch');
 var sleep = require('sleep');
-var Queue = require('promise-queue');
 
-var queue = new Queue(1, 1000);
 var compression = require('compression');
 
 app.use(compression());
@@ -17,6 +15,16 @@ var api = require('./api/riot');
 app.set('port', (process.env.PORT || 5000));
 
 app.use(express.static(__dirname + '/public'));
+
+
+////Q
+var RABBIT_URL = 'amqp://22hbPd6w:9ogmUY0y6pAlp4QLW9cdt4z59KLukck9@swift-threarah-47.bigwig.lshift.net:11046/Mi8ki3NDfr_6';
+var jackrabbit = require('jackrabbit');
+var rabbit = jackrabbit(RABBIT_URL);
+var exchange = rabbit.default();
+var hello = exchange.queue({ name: 'hello' });
+////Q
+
 
 // views is directory for all template files
 //app.set('views', __dirname + '/views');
@@ -58,40 +66,11 @@ app.get('/stats/:name', function(request, response) {
   });
 });
 
-function grabIt(matchId) {
-  matches = db.get().collection('matches');
-  matches.find({gameId: {$eq: matchId}}).toArray(function(err, items) {
-    if (items.length == 0) {
-      console.log("Qing", matchId);
-      queue.add(function() {
-        console.log("Fetching", matchId, queue.getQueueLength(), "remain");        
-        return Promise.all([api.getMatchData(matchId), api.getMatchTimeline(matchId)])
-          .then((matchData) => {
-            matchData[0].timeline = matchData[1]
-            if(!err) {
-              matches.insert( matchData[0], {w:1}, function(err, result) {});
-            }
-        });
-      });
-    } else {
-      console.log("Skipping",matchId);
-    }
-  });
-}
-
 app.get('/load/:name', function(request, response) {
     var name = request.params.name;
-    api.getSummonerId(name)
-    .then((accountId) => {
-        return api.getRecentMatchIds(accountId);
-    }).then((matchIds) => {
-      console.log(matchIds);
-      response.send(matchIds);
-      for(var i = 0; i < matchIds.length; i++) { //matchIds.length
-        grabIt(matchIds[i]);
-      }
-    });
-    // response.render('pages/index');
+    exchange.publish(name, { key: 'player_update' });
+    console.log("Publish name", name);
+    response.send("Queued task");
 });
 
 app.get('*', function(request, response) {

@@ -10,7 +10,7 @@ exports.riotGet = function(path) {
       cache: 'default',
     };
   console.log("FETCH", path);
-  return fetch(path, options).then((d)=>{ return d.json() });
+  return fetch(path, options).then((d)=>{ console.log("RES", d.status, d.statusText); return d.json() });
 }
 
 exports.getSummonerId = function(name) {

@@ -21,6 +21,8 @@
     "express": "^4.15.2",
     "fetch": "^1.1.0",
     "isomorphic-fetch": "^2.2.1",
+    "jackrabbit": "^4.3.0",
+    "limiter": "^1.1.2",
     "mongodb": "^2.2.30",
     "node-fetch": "^1.7.1",
     "promise-queue": "^2.2.3",
