@@ -8,6 +8,49 @@ import {
 } from './actions/actions'
 import { withRouter } from 'react-router-dom'
 
+function sum(x) {
+  var s = 0;
+  for(let i = 0; i < x.length; i++) {
+    s += i;
+  }
+  return s;
+}
+
+function mean(x) {
+  return sum(x)/x.length;
+}
+
+function ewAdd(x, d) {
+  return x.map((el) => el + d);
+}
+
+function stdev(x) {
+  var sum = 0;
+  var u = mean(x);
+  for(let i = 0; i < x.length; i++) {
+    sum += (x[i] - u)*(x[i] - u);
+  }
+  return Math.sqrt(sum/(x.length - 1));
+}
+
+function corr(x, y) {
+  if (x.length != y.length) {
+    return NaN;
+  }
+  var sdx = stdev(x);
+  var sdy = stdev(y);
+  var ux = mean(x);
+  var uy = mean(y);
+  var Xdiff = ewAdd(x, -ux);
+  var Ydiff = ewAdd(y, -uy);
+  var sum = 0;
+  for(let i = 0; i < x.length; i++) {
+    sum += Xdiff[i] * Ydiff[i];
+  }
+  var num = sum/x.length;
+  return num/(sdx * sdy);
+}
+
 function DFS(obj, path, store) {
   if (typeof(obj) == 'string') {
     store[path] = 'string'
@@ -40,6 +83,17 @@ function getLeafWithPath(obj, path) {
     into = into[keys[i]];
   }
   return into
+}
+
+function corrWithPath(matches, path, variate) {
+  var s = [];
+  for(var i = 0; i < matches.length; i++) {
+    var v = getLeafWithPath(matches[i], path)
+    if (v != undefined) {
+      s.push(v);
+    }
+  }
+  return corr(s, variate);
 }
 
 function averageWithPath(matches, path) {
@@ -78,6 +132,17 @@ function avgCSd10(matches) {
   return c/n;
 }
 
+function corrForNumbers(tree, mapping, variate) {
+  var data = [];
+  for(let i = 0; i < Object.keys(mapping).length; i++) {
+    var path = Object.keys(mapping)[i];
+    if (mapping[path] == 'number') {
+      data.push(corrWithPath(tree, path, variate));
+    }
+  }
+  return data;
+}
+
 function averagesForNumbers(tree, mapping) {
   var averages = [];
   for(let i = 0; i < Object.keys(mapping).length; i++) {
@@ -100,6 +165,9 @@ function fLoss(matches) {
 class ShowStat extends Component {
   render() {
     if (this.props.stats.length > 0) {
+      var cs_array = this.props.stats[0].metrics.matches.map((el) => el.participant.stats.totalMinionsKilled);
+      var w_array = this.props.stats[0].metrics.matches.map((el) => el.participant.stats.win ? 1 : -1);
+      console.log("CORR", corr(cs_array, w_array));
       var mapping = {};
       var single_match = this.props.stats[0].metrics.matches[0]
       DFS(single_match, 'match', mapping);
@@ -117,12 +185,14 @@ class ShowStat extends Component {
         }
       }
       var averages = averagesForNumbers(this.props.stats[0].metrics.matches, mapping);
+      var correlates = corrForNumbers(this.props.stats[0].metrics.matches, mapping, w_array);
       var average_w = averagesForNumbers(fWins(this.props.stats[0].metrics.matches), mapping);
       var average_l = averagesForNumbers(fLoss(this.props.stats[0].metrics.matches), mapping);
       var merged = [];
 
       for(let i = 0; i < averages.length; i++) {
         var key = averages[i][0];
+        var c_data = correlates[i];
         var w_data = undefined;
         var l_data = undefined;
         if (average_w[i][0] === key) {
@@ -137,6 +207,7 @@ class ShowStat extends Component {
             averages[i][1],
             w_data,
             l_data,
+            Math.round(c_data*100, -3)/100.0,
             w_data - l_data,
           ]
         );
@@ -163,12 +234,13 @@ class ShowStat extends Component {
                   <td>Average</td>
                   <td>Avg Win</td>
                   <td>Avg Loss</td>
+                  <td>Corr: Win</td>
                   <td>AvgW - AvgL</td>
                   </tr>
                 </thead>
                 <tbody>
             { merged.map((el) => {
-              return (<tr><td>{el[0]}</td><td>{el[1]}</td><td>{el[2]}</td><td>{el[3]}</td><td>{el[4]}</td></tr>)
+              return (<tr><td>{el[0]}</td><td>{el[1]}</td><td>{el[2]}</td><td>{el[3]}</td><td>{el[4]}</td><td>{el[5]}</td></tr>)
             })}
             </tbody>
             </table>
