@@ -8,6 +8,9 @@ import {
 } from './actions/actions'
 import { withRouter } from 'react-router-dom'
 
+import { Chart } from 'react-google-charts';
+
+
 function sum(x) {
   var s = 0;
   for(let i = 0; i < x.length; i++) {
@@ -189,8 +192,40 @@ function gpm(match) {
   return match.participant.stats.goldEarned / match.gameDuration;
 }
 
+function projSlice(path, objs) {
+  var p = [];
+  for(let i = 0; i < objs.length; i++) {
+    p.push(getLeafWithPath(objs[i], path));
+  }
+  return p;
+}
+
+// Project into objects, return column-oriented
+function getProjCWise(paths, objs) {
+  var rv = {};
+  for(let i = 0; i < paths.length; i++) {
+    rv[paths[i]] = projSlice(paths[i], objs);
+  }
+  return rv;
+}
+
+// Project into objects, return row-oriented
+function getProjRWise(paths, objs) {
+  var rv = [paths, ];
+  for(let i = 0; i < objs.length; i++) {
+    var acc = [];
+    for(let j = 0; j < paths.length; j++) {
+      acc.push(getLeafWithPath(objs[i], paths[j]));
+    }
+    rv.push(acc);
+  }
+  return rv;
+}
+
 class ShowStat extends Component {
+
   render() {
+    console.log("ShowStat.render", this.props, this.state);
     if (this.props.stats.length > 0) {
       attach_stat(this.props.stats[0].metrics.matches, 'gpm', gpm);
       var cs_array = this.props.stats[0].metrics.matches.map((el) => el.participant.stats.totalMinionsKilled);
@@ -201,7 +236,7 @@ class ShowStat extends Component {
       DFS(single_match, 'match', mapping);
       console.log(getLeafWithPath(single_match, 'match.participant.championId'))
       console.log(mapping);
-
+  
       // Find best mapping
       var max = -1;
       for(let i = 0; i < this.props.stats[0].metrics.matches.length; i++) {
@@ -241,9 +276,33 @@ class ShowStat extends Component {
         );
       }
       console.log(averages);
+      // Prep chart views
+      console.log("RBEFORE", this.props.match.params);
+      var prx = [];
+      if (this.props.match.params.xstat) {
+        var idxs = [this.props.match.params.xstat, this.props.match.params.ystat]
+        var prx = getProjRWise(idxs, this.props.stats[0].metrics.matches);
+        console.log("PRX", prx);
+      }
     }
 
     if (this.props.stats.length > 0) {
+      if (this.props.match.params.xstat) {
+        return (
+          <div className={'my-pretty-chart-container'}>
+            <Chart
+              chartType="ScatterChart"
+              data={prx}
+              options={{}}
+              graph_id="ScatterChart"
+              width="100%"
+              height="400px"
+              legend_toggle
+            />
+          </div>
+        )
+      }
+      else {
       return (
           <div>
             <div>CS Average: { this.props.stats[0].metrics.cs.mean }</div>
@@ -274,6 +333,7 @@ class ShowStat extends Component {
             </table>
           </div>
           )
+      }
     }
     return (<div>Loading</div>);
   }
@@ -281,6 +341,7 @@ class ShowStat extends Component {
 
 class AsyncApp extends Component {
   constructor(props) {
+    console.log("########### AsyncApp.constructor");
     super(props)
     this.handleChange = this.handleChange.bind(this)
     this.handleRefreshClick = this.handleRefreshClick.bind(this)
@@ -335,10 +396,9 @@ class AsyncApp extends Component {
             </a>}
         </p>
         {isFetching && <h2>Loading...</h2>}
-        {
-          <div style={{ opacity: isFetching ? 0.5 : 1 }}>
-            <ShowStat stats={stats} />
-          </div>}
+        <div style={{ opacity: isFetching ? 0.5 : 1 }}>
+          <ShowStat stats={stats} match={this.props.match} />
+        </div>
       </div>
     )
   }
@@ -371,4 +431,4 @@ function mapStateToProps(state) {
   }
 }
 
-export default connect(mapStateToProps)(AsyncApp)
+export default connect(mapStateToProps)(AsyncApp);
