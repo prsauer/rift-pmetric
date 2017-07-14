@@ -47,6 +47,9 @@ function fetchData(matchId) {
                 sleep.msleep(1200);
               });
             }
+            else {
+              console.log("DatabaseError", err);
+            }
         });
     }
     else {
