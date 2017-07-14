@@ -43,7 +43,9 @@ function fetchData(matchId) {
           .then((matchData) => {
             matchData[0].timeline = matchData[1]
             if(!err) {
+              console.log("Writing match", matchData[0].gameId)
               matches.insert( matchData[0], {w:1}, function(err, result) {
+                console.log("Wrote", err);
                 sleep.msleep(1200);
               });
             }
