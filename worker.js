@@ -38,14 +38,18 @@ function onMatchId(matchId) {
 function fetchData(matchId) {
   matches = db.get().collection('matches');
   return matches.find({gameId: {$eq: matchId}}).toArray(function(err, items) {
+    if (err) {
+      console.log(err.name, err.message);
+    }
     if (items.length == 0) {
       return Promise.all([api.getMatchData(matchId), api.getMatchTimeline(matchId)])
           .then((matchData) => {
             matchData[0].timeline = matchData[1]
             if(!err) {
-              console.log("Writing match", matchData[0].gameId)
               matches.insert( matchData[0], {w:1}, function(err, result) {
-                console.log("Wrote", err);
+                if (err) {
+                  console.log(err.name, err.message, err.code, err.errmsg);
+                }
                 sleep.msleep(1200);
               });
             }
@@ -59,28 +63,6 @@ function fetchData(matchId) {
     }
   });
 }
-
-// function grabIt(matchId) {
-//   matches = db.get().collection('matches');
-//   return matches.find({gameId: {$eq: matchId}}).toArray(function(err, items) {
-//     if (items.length == 0) {
-//       console.log("Qing", matchId);
-//       exchange.publish(matchId, { key: 'match_ids' });
-//       queue.add(function() {
-//         console.log("Fetching", matchId, queue.getQueueLength(), "remain");        
-//         return Promise.all([api.getMatchData(matchId), api.getMatchTimeline(matchId)])
-//           .then((matchData) => {
-//             matchData[0].timeline = matchData[1]
-//             if(!err) {
-//               matches.insert( matchData[0], {w:1}, function(err, result) {});
-//             }
-//         });
-//       });
-//     } else {
-//       console.log("Skipping",matchId);
-//     }
-//   });
-// }
 
 function onPlayerNamed(name) {
   console.log('PlayerNamed:', name);
