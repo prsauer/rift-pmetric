@@ -1,5 +1,5 @@
 var RateLimiter = require('limiter').RateLimiter;
-var limiter = new RateLimiter(1, 'second');
+var limiter = new RateLimiter(20, 'minute');
 
 var Queue = require('promise-queue');
 var queue = new Queue(1, 1000);
