@@ -267,6 +267,7 @@ class ShowStat extends Component {
           ]
         );
         merged = merged.filter((el) => (Math.abs(el[4]) > 0.3));
+        merged.sort((a, b) => (b[4] - a[4]));
       }
     }
 
