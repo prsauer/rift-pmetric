@@ -34,7 +34,7 @@ export function mean(x) {
 // X1 is data when the dichotomous variable is 1
 // X2 is data when the dichotomous variable is 0
 export function pbCorr(X1, X2) {
-  var sd = stdev(Array.concat(X1, X2));
+  var sd = stdev(X1.concat(X2));
   var m1 = mean(X1);
   var m2 = mean(X2);
   var n1 = X1.length;
