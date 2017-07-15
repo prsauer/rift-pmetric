@@ -9,49 +9,12 @@ import {
 import { withRouter } from 'react-router-dom'
 
 import { Chart } from 'react-google-charts';
+import { Table } from 'react-bootstrap';
 
-
-function sum(x) {
-  var s = 0;
-  for(let i = 0; i < x.length; i++) {
-    s += i;
-  }
-  return s;
-}
-
-function mean(x) {
-  return sum(x)/x.length;
-}
+import { sum, mean, pbCorr, stdev } from './stats';
 
 function ewAdd(x, d) {
   return x.map((el) => el + d);
-}
-
-function stdev(x) {
-  var sum = 0;
-  var u = mean(x);
-  for(let i = 0; i < x.length; i++) {
-    sum += (x[i] - u)*(x[i] - u);
-  }
-  return Math.sqrt(sum/(x.length - 1));
-}
-
-function corr(x, y) {
-  if (x.length != y.length) {
-    return NaN;
-  }
-  var sdx = stdev(x);
-  var sdy = stdev(y);
-  var ux = mean(x);
-  var uy = mean(y);
-  var Xdiff = ewAdd(x, -ux);
-  var Ydiff = ewAdd(y, -uy);
-  var sum = 0;
-  for(let i = 0; i < x.length; i++) {
-    sum += Xdiff[i] * Ydiff[i];
-  }
-  var num = sum/x.length;
-  return num/(sdx * sdy);
 }
 
 function DFS(obj, path, store) {
@@ -103,6 +66,30 @@ function getLeafWithPath(obj, path) {
   return into
 }
 
+
+function pCorrWithPath(matches, path, variate) {
+  var wdata = [];
+  var ldata = [];
+
+  var ws = fWins(matches);
+  var ls = fLoss(matches);
+  
+  for(var i = 0; i < ws.length; i++) {
+    var v = getLeafWithPath(ws[i], path)
+    if (v != undefined) {
+      wdata.push(v);
+    }
+  }
+  for(var i = 0; i < ls.length; i++) {
+    var v = getLeafWithPath(ls[i], path)
+    if (v != undefined) {
+      ldata.push(v);
+    }
+  }
+  return pbCorr(wdata, ldata);
+}
+
+
 function corrWithPath(matches, path, variate) {
   var s = [];
   var w = [];
@@ -121,9 +108,6 @@ function averageWithPath(matches, path) {
   var s = 0;
   for(var i = 0; i < matches.length; i++) {
     var v = getLeafWithPath(matches[i], path)
-    if (path == 'match.playerTimeline0.totalGold') {
-      console.log(v);
-    }
     if (v != undefined) {
       s += v;
       n++;
@@ -150,6 +134,17 @@ function avgCSd10(matches) {
     }
   }
   return c/n;
+}
+
+function pCorrForNumbers(tree, mapping) {
+  var data = [];
+  for(let i = 0; i < Object.keys(mapping).length; i++) {
+    var path = Object.keys(mapping)[i];
+    if (mapping[path] == 'number') {
+      data.push(pCorrWithPath(tree, path));
+    }
+  }
+  return data;
 }
 
 function corrForNumbers(tree, mapping) {
@@ -180,6 +175,11 @@ function fWins(matches) {
 
 function fLoss(matches) {
   return matches.filter((m) => !m.participant.stats.win);
+}
+
+function fRole(matches, role) {
+  //""
+  return matches.filter((m) => (role == m.participant.timeline.role));
 }
 
 function attach_stat(matches, name, gen) {
@@ -227,30 +227,26 @@ class ShowStat extends Component {
   render() {
     console.log("ShowStat.render", this.props, this.state);
     if (this.props.stats.length > 0) {
-      attach_stat(this.props.stats[0].metrics.matches, 'gpm', gpm);
-      var cs_array = this.props.stats[0].metrics.matches.map((el) => el.participant.stats.totalMinionsKilled);
-      var w_array = this.props.stats[0].metrics.matches.map((el) => el.participant.stats.win ? 1 : -1);
-      console.log("CORR", corr(cs_array, w_array));
+      //hackfilter
+      var matches = fRole(this.props.stats[0].metrics.matches, 'DUO_CARRY');
+      attach_stat(matches, 'gpm', gpm);
+
       var mapping = {};
-      var single_match = this.props.stats[0].metrics.matches[0]
-      DFS(single_match, 'match', mapping);
-      console.log(getLeafWithPath(single_match, 'match.participant.championId'))
-      console.log(mapping);
-  
       // Find best mapping
       var max = -1;
-      for(let i = 0; i < this.props.stats[0].metrics.matches.length; i++) {
+      for(let i = 0; i < matches.length; i++) {
         var new_map = {};
-        DFS(this.props.stats[0].metrics.matches[i], 'match', new_map);
+        DFS(matches[i], 'match', new_map);
         if (Object.keys(new_map).length > max) {
           mapping = new_map;
           max = Object.keys(new_map).length;
         }
       }
-      var averages = averagesForNumbers(this.props.stats[0].metrics.matches, mapping);
-      var correlates = corrForNumbers(this.props.stats[0].metrics.matches, mapping);
-      var average_w = averagesForNumbers(fWins(this.props.stats[0].metrics.matches), mapping);
-      var average_l = averagesForNumbers(fLoss(this.props.stats[0].metrics.matches), mapping);
+      console.log("Map", mapping);
+      var averages = averagesForNumbers(matches, mapping);
+      var correlates = pCorrForNumbers(matches, mapping);
+      var average_w = averagesForNumbers(fWins(matches), mapping);
+      var average_l = averagesForNumbers(fLoss(matches), mapping);
       var merged = [];
 
       for(let i = 0; i < averages.length; i++) {
@@ -275,14 +271,11 @@ class ShowStat extends Component {
           ]
         );
       }
-      console.log(averages);
       // Prep chart views
-      console.log("RBEFORE", this.props.match.params);
       var prx = [];
       if (this.props.match.params.xstat) {
         var idxs = [this.props.match.params.xstat, this.props.match.params.ystat]
-        var prx = getProjRWise(idxs, this.props.stats[0].metrics.matches);
-        console.log("PRX", prx);
+        var prx = getProjRWise(idxs, matches);
       }
     }
 
@@ -304,17 +297,10 @@ class ShowStat extends Component {
       }
       else {
       return (
-          <div>
-            <div>CS Average: { this.props.stats[0].metrics.cs.mean }</div>
-            <div>CSd10 Average: { this.props.stats[0].metrics.csd10.mean }</div>
-
-            <div>Average CSd10 on Win: { avgCSd10(fWins(this.props.stats[0].metrics.matches)) }</div>
-            <div>Average CSd10 on Lose: { avgCSd10(fLoss(this.props.stats[0].metrics.matches)) }</div>
-
-            <div>Average CS on Win: { avgCS(fWins(this.props.stats[0].metrics.matches)) }</div>
-            <div>Average CS on Lose: { avgCS(fLoss(this.props.stats[0].metrics.matches)) }</div>
+          <div className="container">
+            <div>N: { matches.length }</div>
             <h3>Averages</h3>
-            <table>
+            <Table>
               <thead>
                 <tr>
                   <td>Name</td>
@@ -322,7 +308,7 @@ class ShowStat extends Component {
                   <td>Avg Win</td>
                   <td>Avg Loss</td>
                   <td>Corr: Win</td>
-                  <td>AvgW - AvgL</td>
+                  <td>Δ</td>
                   </tr>
                 </thead>
                 <tbody>
@@ -330,7 +316,7 @@ class ShowStat extends Component {
               return (<tr><td>{el[0]}</td><td>{el[1]}</td><td>{el[2]}</td><td>{el[3]}</td><td>{el[4]}</td><td>{el[5]}</td></tr>)
             })}
             </tbody>
-            </table>
+            </Table>
           </div>
           )
       }
