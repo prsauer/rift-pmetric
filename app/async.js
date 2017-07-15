@@ -69,33 +69,19 @@ function pCorrWithPath(matches, path, variate) {
   var ws = fWins(matches);
   var ls = fLoss(matches);
   
-  for (var i = 0; i < ws.length; i++) {
-    var v = getLeafWithPath(ws[i], path);
+  for (let i = 0; i < ws.length; i++) {
+    let v = getLeafWithPath(ws[i], path);
     if (v != undefined) {
       wdata.push(v);
     }
   }
-  for (var i = 0; i < ls.length; i++) {
-    var v = getLeafWithPath(ls[i], path);
+  for (let i = 0; i < ls.length; i++) {
+    let v = getLeafWithPath(ls[i], path);
     if (v != undefined) {
       ldata.push(v);
     }
   }
   return pbCorr(wdata, ldata);
-}
-
-
-function corrWithPath(matches, path, variate) {
-  var s = [];
-  var w = [];
-  for (var i = 0; i < matches.length; i++) {
-    var v = getLeafWithPath(matches[i], path);
-    if (v != undefined) {
-      s.push(v);
-      w.push(matches[i].participant.stats.win);
-    }
-  }
-  return corr(s, w);
 }
 
 function averageWithPath(matches, path) {
@@ -111,43 +97,12 @@ function averageWithPath(matches, path) {
   return s / n;
 }
 
-function avgCS(matches) {
-  var cs = 0;
-  for (var i = 0; i < matches.length; i++) {
-    cs += matches[i].participant.stats.totalMinionsKilled;
-  }
-  return cs / matches.length;
-}
-
-function avgCSd10(matches) {
-  var c = 0;
-  var n = 0;
-  for (var i = 0; i < matches.length; i++) {
-    if (matches[i].participant.timeline.csDiffPerMinDeltas !== undefined) {
-      c += 10 * matches[i].participant.timeline.csDiffPerMinDeltas['0-10'];
-      n++;
-    }
-  }
-  return c / n;
-}
-
 function pCorrForNumbers(tree, mapping) {
   var data = [];
   for (let i = 0; i < Object.keys(mapping).length; i++) {
     var path = Object.keys(mapping)[i];
     if (mapping[path] == 'number') {
       data.push(pCorrWithPath(tree, path));
-    }
-  }
-  return data;
-}
-
-function corrForNumbers(tree, mapping) {
-  var data = [];
-  for (let i = 0; i < Object.keys(mapping).length; i++) {
-    var path = Object.keys(mapping)[i];
-    if (mapping[path] == 'number') {
-      data.push(corrWithPath(tree, path));
     }
   }
   return data;
@@ -187,22 +142,22 @@ function gpm(match) {
   return match.participant.stats.goldEarned / match.gameDuration;
 }
 
-function projSlice(path, objs) {
-  var p = [];
-  for (let i = 0; i < objs.length; i++) {
-    p.push(getLeafWithPath(objs[i], path));
-  }
-  return p;
-}
+// function projSlice(path, objs) {
+//   var p = [];
+//   for (let i = 0; i < objs.length; i++) {
+//     p.push(getLeafWithPath(objs[i], path));
+//   }
+//   return p;
+// }
 
 // Project into objects, return column-oriented
-function getProjCWise(paths, objs) {
-  var rv = {};
-  for (let i = 0; i < paths.length; i++) {
-    rv[paths[i]] = projSlice(paths[i], objs);
-  }
-  return rv;
-}
+// function getProjCWise(paths, objs) {
+//   var rv = {};
+//   for (let i = 0; i < paths.length; i++) {
+//     rv[paths[i]] = projSlice(paths[i], objs);
+//   }
+//   return rv;
+// }
 
 // Project into objects, return row-oriented
 function getProjRWise(paths, objs) {
@@ -270,7 +225,7 @@ class ShowStat extends Component {
       var chartData = [];
       if (this.props.match.params.xstat) {
         var idxs = [this.props.match.params.xstat, this.props.match.params.ystat];
-        var chartData = getProjRWise(idxs, matches);
+        chartData = getProjRWise(idxs, matches);
       }
     }
 
@@ -307,7 +262,15 @@ class ShowStat extends Component {
               </thead>
               <tbody>
                 { merged.map((el) => {
-                  return (<tr><td>{el[0]}</td><td>{el[1]}</td><td>{el[2]}</td><td>{el[3]}</td><td>{el[4]}</td><td>{el[5]}</td></tr>);
+                  return (
+                    <tr>
+                      <td>{el[0]}</td>
+                      <td>{el[1]}</td>
+                      <td>{el[2]}</td>
+                      <td>{el[3]}</td>
+                      <td>{el[4]}</td>
+                      <td>{el[5]}</td>
+                    </tr>);
                 })}
               </tbody>
             </Table>
