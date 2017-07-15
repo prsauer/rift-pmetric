@@ -4,7 +4,25 @@ import {
   INVALIDATE_SUMMONER,
   REQUEST_STATS,
   RECEIVE_STATS,
+  UPDATE_FILTER,
+  LOAD_MATCHES,
 } from './actions/actions';
+
+function applyFilter(filter, matches) {
+  return matches;
+}
+
+function filteredMatchData(state = {filter: {}, matches: []}, action) {
+  switch (action.type) {
+    case LOAD_MATCHES:
+      return Object.assign({}, state, { matches: action.matches });
+    case UPDATE_FILTER:
+      var matches = applyFilter(action.filter, state.matches);
+      return Object.assign({}, { matches, filter: action.filter });
+    default:
+      return state;
+  }
+}
 
 function selectedSummoner(state = '', action) {
   switch (action.type) {
@@ -61,6 +79,7 @@ function statsBySummoner(state = {}, action) {
 const rootReducer = combineReducers({
   statsBySummoner,
   selectedSummoner,
+  filteredMatchData,
 });
 
 export default rootReducer;

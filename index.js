@@ -5,7 +5,7 @@ var sleep = require('sleep');
 
 var compression = require('compression');
 
-app.use(compression());
+app.use(compression({level: 9}));
 
 // Retrieve
 var db = require('./db');
@@ -53,7 +53,7 @@ app.get('/stats_write/:name', function(request, response) {
 });
 
 app.get(RegExp('/stats/([a-zA-Z._%1234567890 ]+)/', 'i'), function(request, response) {
-  response.setHeader('Cache-Control', 'no-cache');
+  // response.setHeader('Cache-Control', 'no-cache');
   var name = request.params['0'].toLocaleLowerCase();
   var statsCollection = db.get().collection('stats');
   statsCollection.find({'summonerName_lower': {$eq: name}})
@@ -68,10 +68,10 @@ app.get(RegExp('/stats/([a-zA-Z._%1234567890 ]+)/', 'i'), function(request, resp
   });
 });
 
-app.get('/load/:name', function(request, response) {
-    var name = request.params.name;
+app.get(RegExp('/load/([a-zA-Z._%1234567890 ]+)/'), function(request, response) {
+    var name = request.params['0'];
     exchange.publish(name, { key: 'player_update' });
-    console.log("Publish name", name);
+    console.log("Publish name", `#${name}#`);
     response.send("Queued task");
 });
 

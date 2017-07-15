@@ -5,6 +5,23 @@ export const RECEIVE_STATS = 'RECEIVE_STATS';
 export const SELECT_SUMMONER = 'SELECT_SUMMONER';
 export const INVALIDATE_SUMMONER = 'INVALIDATE_SUMMONERT';
 
+export const LOAD_MATCHES = 'LOAD_MATCHES';
+export const UPDATE_FILTER = 'UPDATE_FILTER';
+
+export function updateFilter(filter) {
+  return {
+    type: UPDATE_FILTER,
+    filter,
+  };
+}
+
+export function loadMatches(matches) {
+  return {
+    type: LOAD_MATCHES,
+    matches,
+  };
+}
+
 export function selectSummoner(summoner) {
   return {
     type: SELECT_SUMMONER,
@@ -35,12 +52,22 @@ function receiveStats(summoner, json) {
   };
 }
 
+export function filterData(filter) {
+  return dispatch => {
+    dispatch(updateFilter(filter));
+  };
+}
+
 function fetchStats(summoner) {
   return dispatch => {
     dispatch(requestStats(summoner));
     return fetch(`/stats/${summoner}/`)
       .then(response => response.json())
-      .then(json => dispatch(receiveStats(summoner, json)));
+      .then(json => {
+        dispatch(loadMatches(json.metrics.matches));
+        return dispatch(receiveStats(summoner, json));
+      }
+      );
   };
 }
 
