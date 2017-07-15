@@ -36,10 +36,10 @@
     "node-fetch": "^1.7.1",
     "promise-queue": "^2.2.3",
     "prop-types": "^15.5.10",
+    "query-string": "^4.3.4",
     "react": "^15.6.1",
     "react-bootstrap": "^0.31.0",
     "react-dom": "^15.6.1",
-    "react-google-charts": "^1.5.5",
     "react-redux": "^5.0.5",
     "react-router": "^4.1.1",
     "react-router-dom": "^4.1.1",
@@ -47,6 +47,9 @@
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.2.0",
     "sleep": "^5.1.1",
+    "victory": "^0.21.2",
+    "victory-chart": "^21.3.0",
+    "victory-core": "^16.3.0",
     "webpack": "^3.2.0"
   },
   "repository": {

@@ -1,7 +1,7 @@
 import {render} from 'react-dom';
 import React from 'react';
 import {
-  BrowserRouter as Router,
+  BrowserRouter,
   Route,
 } from 'react-router-dom';
 
@@ -19,20 +19,19 @@ const Home = () => (
   </div>
 );
 
-const Topic = ({ match }) => (
-  <div>
-    <AApp match={match} />
-  </div>
-);
 
-const Topics = ({ match }) => (
-  <div>
-    <Route path={`${match.url}/:topicId/:xstat?/:ystat?`} component={Topic} />
-  </div>
-);
+const SummonerPage = (props) => {
+  console.log('SummonerPageRender', props);
+  return (
+    <div>
+      <AApp {...props} />
+    </div>
+  );
+};
+
 
 const RoutedContent = () => (
-  <Router>
+  <BrowserRouter>
     <div className="container">
       <Navbar>
         <Navbar.Header>
@@ -46,9 +45,9 @@ const RoutedContent = () => (
         </Nav>
       </Navbar>
       <Route exact path="/" component={Home} />
-      <Route path="/data" component={Topics} />
+      <Route history={history} path="/summoner/:summonerName" component={SummonerPage} />
     </div>
-  </Router>
+  </BrowserRouter>
 );
 
 class App extends React.Component {

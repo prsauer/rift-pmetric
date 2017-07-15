@@ -2,8 +2,15 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-import { Chart } from 'react-google-charts';
 import { Table } from 'react-bootstrap';
+
+import queryString from 'query-string';
+
+import { VictoryChart, VictoryScatter, VictoryTheme } from 'victory';
+
+import {
+  Route,
+} from 'react-router-dom';
 
 import {
   selectSummoner,
@@ -161,21 +168,58 @@ function gpm(match) {
 
 // Project into objects, return row-oriented
 function getProjRWise(paths, objs) {
-  var rv = [paths];
+  var rv = [];
+  var minx = 2499560711062;
+  var maxx = -1;
   for (let i = 0; i < objs.length; i++) {
-    var acc = [];
-    for (let j = 0; j < paths.length; j++) {
-      acc.push(getLeafWithPath(objs[i], paths[j]));
+    var x = getLeafWithPath(objs[i], paths[0]);
+    var y = getLeafWithPath(objs[i], paths[1]);
+    if (x > maxx) {
+      maxx = x;
     }
-    rv.push(acc);
+    if (x < minx) {
+      minx = x;
+    }
+    rv.push({ x, y });
   }
+  console.log(minx, maxx);
   return rv;
+}
+
+class ShowChart extends Component {
+  render() {
+    console.log("ChartRender", this.props);
+    const parsed = queryString.parse(this.props.match.location.search);
+    if (parsed.x == undefined || parsed.y == undefined) {
+      return (null);
+    }
+    var idxs = [parsed.x, parsed.y];
+    var chartData = getProjRWise(idxs, this.props.matches);
+    return (
+      <div className={'my-pretty-chart-container'}>
+        <VictoryChart
+          theme={VictoryTheme.material}
+        >
+          <VictoryScatter
+            style={{ data: { fill: "#c43a31" } }}
+            size={7}
+            data={
+              chartData
+            }
+          />
+        </VictoryChart>
+      </div>
+    )
+  }
 }
 
 class ShowStat extends Component {
 
   render() {
     console.log('ShowStat.render', this.props, this.state);
+    if (this.props.stats === undefined) {
+      return (<div>Dead text</div>)
+    }
     if (this.props.stats.length > 0) {
       //hackfilter
       var matches = fRole(this.props.stats[0].metrics.matches, 'DUO_CARRY');
@@ -294,7 +338,7 @@ class AsyncApp extends Component {
     console.log('Mounted with', this.props);
     const { dispatch, selectedSummoner } = this.props;
     if (this.props.match.topicId != selectedSummoner) {
-      dispatch(selectSummoner(this.props.match.params.topicId));
+      dispatch(selectSummoner(this.props.match.params.summonerName));
     } else {
       dispatch(fetchStatsIfNeeded(selectedSummoner));
     }
@@ -325,6 +369,12 @@ class AsyncApp extends Component {
     return (
       <div>
         <h2>{selectedSummoner}</h2>
+        {
+          this.props.stats[0] &&
+          <Route exact path="/summoner/:summonerName/" render={(props) => (
+            <ShowChart match={this.props} matches={this.props.stats[0].metrics.matches} />
+          )} />
+        }
         <p>
           {lastUpdated &&
             <span>
