@@ -87,5 +87,6 @@ export function fetchStatsIfNeeded(summoner) {
     if (shouldFetchStats(getState(), summoner)) {
       return dispatch(fetchStats(summoner));
     }
+    return null;
   };
 }

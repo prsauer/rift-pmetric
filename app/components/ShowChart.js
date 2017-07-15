@@ -9,7 +9,7 @@ import { getProjRWise } from '../matchops/chartprep';
 
 export default class ShowChart extends Component {
   render() {
-    console.log("ChartRender", this.props);
+    console.log('ChartRender', this.props);
     const parsed = queryString.parse(this.props.match.location.search);
     if (parsed.x == undefined || parsed.y == undefined) {
       return (null);
@@ -32,6 +32,6 @@ export default class ShowChart extends Component {
           />
         </VictoryChart>
       </div>
-    )
+    );
   }
 }

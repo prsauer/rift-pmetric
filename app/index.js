@@ -5,7 +5,7 @@ import {
   Route,
 } from 'react-router-dom';
 
-import { Nav, Navbar, NavItem } from 'react-bootstrap';
+import { Navbar } from 'react-bootstrap';
 
 import { Provider } from 'react-redux';
 import configureStore from './configureStore';
@@ -19,7 +19,6 @@ const Home = () => (
   </div>
 );
 
-
 const SummonerPage = (props) => {
   console.log('SummonerPageRender', props);
   return (
@@ -29,6 +28,9 @@ const SummonerPage = (props) => {
   );
 };
 
+// <Nav>
+// <NavItem eventKey={1} href="#">Home</NavItem>
+// </Nav>
 
 const RoutedContent = () => (
   <BrowserRouter>
@@ -36,13 +38,10 @@ const RoutedContent = () => (
       <Navbar>
         <Navbar.Header>
           <Navbar.Brand>
-            <a href="#">R-M</a>
+            <a href="#">R M</a>
           </Navbar.Brand>
           <Navbar.Toggle />
         </Navbar.Header>
-        <Nav>
-          <NavItem eventKey={1} href="#">Home</NavItem>
-        </Nav>
       </Navbar>
       <Route exact path="/" component={Home} />
       <Route history={history} path="/summoner/:summonerName" component={SummonerPage} />

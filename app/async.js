@@ -28,7 +28,7 @@ class ShowStat extends Component {
     console.log('ShowStat.render', this.props, this.state);
     var matches = this.props.matches;
     if (matches === []) {
-      return (<div>Dead text</div>)
+      return (<div>Loading</div>);
     }
 
     var mapping = {};
