@@ -52,17 +52,19 @@ app.get('/stats_write/:name', function(request, response) {
   });
 });
 
-app.get('/stats/:name', function(request, response) {
-  response.setHeader('Cache-Control', 'no-cache')
-  var name = request.params.name.toLocaleLowerCase();
+app.get(RegExp('/stats/([a-zA-Z._%1234567890 ]+)/', 'i'), function(request, response) {
+  response.setHeader('Cache-Control', 'no-cache');
+  var name = request.params['0'].toLocaleLowerCase();
   var statsCollection = db.get().collection('stats');
   statsCollection.find({'summonerName_lower': {$eq: name}})
   .toArray(function(err, items) {
     if (items.length != 1) {
-      response.send(400);
+      response.sendStatus(404);
     }
-    delete items[0]._id; // Don't serve MongoDB internal id
-    response.send(items[0]);
+    else {
+      delete items[0]._id; // Don't serve MongoDB internal id
+      response.send(items[0]);
+    }
   });
 });
 
@@ -73,7 +75,7 @@ app.get('/load/:name', function(request, response) {
     response.send("Queued task");
 });
 
-app.get('*', function(request, response) {
+app.get('/summoner/*', function(request, response) {
   response.sendFile('public/index.html', {"root": __dirname});
 });
 
