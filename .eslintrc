@@ -1,0 +1,6 @@
+{
+  "extends": ["airbnb", "fbjs"],
+  "rules": {
+    "func-names": ["error", "never"]
+  }
+}

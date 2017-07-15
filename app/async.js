@@ -1,12 +1,12 @@
-import React, { Component } from 'react'
-import PropTypes from 'prop-types'
-import { connect } from 'react-redux'
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 import {
   selectSummoner,
   fetchStatsIfNeeded,
-  invalidateSummoner
-} from './actions/actions'
-import { withRouter } from 'react-router-dom'
+  invalidateSummoner,
+} from './actions/actions';
+import { withRouter } from 'react-router-dom';
 
 import { Chart } from 'react-google-charts';
 import { Table } from 'react-bootstrap';
@@ -18,52 +18,51 @@ function ewAdd(x, d) {
 }
 
 function DFS(obj, path, store) {
-  if (path.search("Id") > -1) {
+  if (path.search('Id') > -1) {
     return;
   }
-  if (path.search("timestamp") > -1) {
+  if (path.search('timestamp') > -1) {
     return;
   }
-  if (path.search("gameScore") > -1) {
+  if (path.search('gameScore') > -1) {
     return;
   }
-  if (path.search("teamScore") > -1) {
+  if (path.search('teamScore') > -1) {
     return;
   }
-  if (path.search("gameCreation") > -1) {
+  if (path.search('gameCreation') > -1) {
     return;
   }
-  if (typeof(obj) == 'string') {
-    store[path] = 'string'
+  if (typeof (obj) == 'string') {
+    store[path] = 'string';
   } else if (Array.isArray(obj)) {
     store[path] = 'array';
-    for(let i = 0; i < obj.length; i++) {
+    for (let i = 0; i < obj.length; i++) {
       DFS(obj[i], path + '.' + i, store);
     }
-  } else if (typeof(obj) == 'object') {
+  } else if (typeof (obj) == 'object') {
     store[path] = 'object';
-    for(let i = 0; i < Object.keys(obj).length; i++) {
+    for (let i = 0; i < Object.keys(obj).length; i++) {
       DFS(obj[Object.keys(obj)[i]], path + '.' + Object.keys(obj)[i], store);
     }
-  } else if (typeof(obj) == 'number') {
+  } else if (typeof (obj) == 'number') {
     store[path] = 'number';
-  }
-  else {
+  } else {
     store[path] = 'unknown';    
   }
-  return
+  
 }
 
 function getLeafWithPath(obj, path) {
-  var keys = path.split('.')
+  var keys = path.split('.');
   var into = obj;
-  for(var i = 1; i < keys.length; i++) {
+  for (var i = 1; i < keys.length; i++) {
     if (into === undefined) {
       return undefined;
     }
     into = into[keys[i]];
   }
-  return into
+  return into;
 }
 
 
@@ -74,14 +73,14 @@ function pCorrWithPath(matches, path, variate) {
   var ws = fWins(matches);
   var ls = fLoss(matches);
   
-  for(var i = 0; i < ws.length; i++) {
-    var v = getLeafWithPath(ws[i], path)
+  for (var i = 0; i < ws.length; i++) {
+    var v = getLeafWithPath(ws[i], path);
     if (v != undefined) {
       wdata.push(v);
     }
   }
-  for(var i = 0; i < ls.length; i++) {
-    var v = getLeafWithPath(ls[i], path)
+  for (var i = 0; i < ls.length; i++) {
+    var v = getLeafWithPath(ls[i], path);
     if (v != undefined) {
       ldata.push(v);
     }
@@ -93,8 +92,8 @@ function pCorrWithPath(matches, path, variate) {
 function corrWithPath(matches, path, variate) {
   var s = [];
   var w = [];
-  for(var i = 0; i < matches.length; i++) {
-    var v = getLeafWithPath(matches[i], path)
+  for (var i = 0; i < matches.length; i++) {
+    var v = getLeafWithPath(matches[i], path);
     if (v != undefined) {
       s.push(v);
       w.push(matches[i].participant.stats.win);
@@ -106,39 +105,39 @@ function corrWithPath(matches, path, variate) {
 function averageWithPath(matches, path) {
   var n = 0;
   var s = 0;
-  for(var i = 0; i < matches.length; i++) {
-    var v = getLeafWithPath(matches[i], path)
+  for (var i = 0; i < matches.length; i++) {
+    var v = getLeafWithPath(matches[i], path);
     if (v != undefined) {
       s += v;
       n++;
     }
   }
-  return s/n;
+  return s / n;
 }
 
 function avgCS(matches) {
   var cs = 0;
-  for(var i = 0; i < matches.length; i++) {
+  for (var i = 0; i < matches.length; i++) {
     cs += matches[i].participant.stats.totalMinionsKilled;
   }
-  return cs/matches.length;
+  return cs / matches.length;
 }
 
 function avgCSd10(matches) {
   var c = 0;
   var n = 0;
-  for(var i = 0; i < matches.length; i++) {
+  for (var i = 0; i < matches.length; i++) {
     if (matches[i].participant.timeline.csDiffPerMinDeltas !== undefined) {
-      c += 10*matches[i].participant.timeline.csDiffPerMinDeltas['0-10'];
+      c += 10 * matches[i].participant.timeline.csDiffPerMinDeltas['0-10'];
       n++;
     }
   }
-  return c/n;
+  return c / n;
 }
 
 function pCorrForNumbers(tree, mapping) {
   var data = [];
-  for(let i = 0; i < Object.keys(mapping).length; i++) {
+  for (let i = 0; i < Object.keys(mapping).length; i++) {
     var path = Object.keys(mapping)[i];
     if (mapping[path] == 'number') {
       data.push(pCorrWithPath(tree, path));
@@ -149,7 +148,7 @@ function pCorrForNumbers(tree, mapping) {
 
 function corrForNumbers(tree, mapping) {
   var data = [];
-  for(let i = 0; i < Object.keys(mapping).length; i++) {
+  for (let i = 0; i < Object.keys(mapping).length; i++) {
     var path = Object.keys(mapping)[i];
     if (mapping[path] == 'number') {
       data.push(corrWithPath(tree, path));
@@ -160,10 +159,10 @@ function corrForNumbers(tree, mapping) {
 
 function averagesForNumbers(tree, mapping) {
   var averages = [];
-  for(let i = 0; i < Object.keys(mapping).length; i++) {
+  for (let i = 0; i < Object.keys(mapping).length; i++) {
     var path = Object.keys(mapping)[i];
     if (mapping[path] == 'number') {
-      averages.push([path, averageWithPath(tree, path)])
+      averages.push([path, averageWithPath(tree, path)]);
     }
   }
   return averages;
@@ -183,8 +182,8 @@ function fRole(matches, role) {
 }
 
 function attach_stat(matches, name, gen) {
-  for(let i = 0; i < matches.length; i++) {
-    matches[i][name] = gen(matches[i])
+  for (let i = 0; i < matches.length; i++) {
+    matches[i][name] = gen(matches[i]);
   }
 }
 
@@ -194,7 +193,7 @@ function gpm(match) {
 
 function projSlice(path, objs) {
   var p = [];
-  for(let i = 0; i < objs.length; i++) {
+  for (let i = 0; i < objs.length; i++) {
     p.push(getLeafWithPath(objs[i], path));
   }
   return p;
@@ -203,7 +202,7 @@ function projSlice(path, objs) {
 // Project into objects, return column-oriented
 function getProjCWise(paths, objs) {
   var rv = {};
-  for(let i = 0; i < paths.length; i++) {
+  for (let i = 0; i < paths.length; i++) {
     rv[paths[i]] = projSlice(paths[i], objs);
   }
   return rv;
@@ -211,10 +210,10 @@ function getProjCWise(paths, objs) {
 
 // Project into objects, return row-oriented
 function getProjRWise(paths, objs) {
-  var rv = [paths, ];
-  for(let i = 0; i < objs.length; i++) {
+  var rv = [paths];
+  for (let i = 0; i < objs.length; i++) {
     var acc = [];
-    for(let j = 0; j < paths.length; j++) {
+    for (let j = 0; j < paths.length; j++) {
       acc.push(getLeafWithPath(objs[i], paths[j]));
     }
     rv.push(acc);
@@ -225,7 +224,7 @@ function getProjRWise(paths, objs) {
 class ShowStat extends Component {
 
   render() {
-    console.log("ShowStat.render", this.props, this.state);
+    console.log('ShowStat.render', this.props, this.state);
     if (this.props.stats.length > 0) {
       //hackfilter
       var matches = fRole(this.props.stats[0].metrics.matches, 'DUO_CARRY');
@@ -234,7 +233,7 @@ class ShowStat extends Component {
       var mapping = {};
       // Find best mapping
       var max = -1;
-      for(let i = 0; i < matches.length; i++) {
+      for (let i = 0; i < matches.length; i++) {
         var new_map = {};
         DFS(matches[i], 'match', new_map);
         if (Object.keys(new_map).length > max) {
@@ -242,14 +241,14 @@ class ShowStat extends Component {
           max = Object.keys(new_map).length;
         }
       }
-      console.log("Map", mapping);
+      console.log('Map', mapping);
       var averages = averagesForNumbers(matches, mapping);
       var correlates = pCorrForNumbers(matches, mapping);
       var average_w = averagesForNumbers(fWins(matches), mapping);
       var average_l = averagesForNumbers(fLoss(matches), mapping);
       var merged = [];
 
-      for(let i = 0; i < averages.length; i++) {
+      for (let i = 0; i < averages.length; i++) {
         var key = averages[i][0];
         var c_data = correlates[i];
         var w_data = undefined;
@@ -263,19 +262,19 @@ class ShowStat extends Component {
         merged.push(
           [
             key,
-            Math.round(averages[i][1]*10)/10.0,
-            Math.round(w_data*10)/10.0,
-            Math.round(l_data*10)/10.0,
-            Math.round(c_data*100, -3)/100.0,
-            Math.round((w_data - l_data)*10)/10.0,
+            Math.round(averages[i][1] * 10) / 10.0,
+            Math.round(w_data * 10) / 10.0,
+            Math.round(l_data * 10) / 10.0,
+            Math.round(c_data * 100, -3) / 100.0,
+            Math.round((w_data - l_data) * 10) / 10.0,
           ]
         );
       }
       // Prep chart views
-      var prx = [];
+      var chartData = [];
       if (this.props.match.params.xstat) {
-        var idxs = [this.props.match.params.xstat, this.props.match.params.ystat]
-        var prx = getProjRWise(idxs, matches);
+        var idxs = [this.props.match.params.xstat, this.props.match.params.ystat];
+        var chartData = getProjRWise(idxs, matches);
       }
     }
 
@@ -285,7 +284,7 @@ class ShowStat extends Component {
           <div className={'my-pretty-chart-container'}>
             <Chart
               chartType="ScatterChart"
-              data={prx}
+              data={chartData}
               options={{}}
               graph_id="ScatterChart"
               width="100%"
@@ -293,10 +292,9 @@ class ShowStat extends Component {
               legend_toggle
             />
           </div>
-        )
-      }
-      else {
-      return (
+        );
+      } else {
+        return (
           <div className="container">
             <div>N: { matches.length }</div>
             <h3>Averages</h3>
@@ -309,16 +307,16 @@ class ShowStat extends Component {
                   <td>Avg Loss</td>
                   <td>Corr: Win</td>
                   <td>Δ</td>
-                  </tr>
-                </thead>
-                <tbody>
-            { merged.map((el) => {
-              return (<tr><td>{el[0]}</td><td>{el[1]}</td><td>{el[2]}</td><td>{el[3]}</td><td>{el[4]}</td><td>{el[5]}</td></tr>)
-            })}
-            </tbody>
+                </tr>
+              </thead>
+              <tbody>
+                { merged.map((el) => {
+                  return (<tr><td>{el[0]}</td><td>{el[1]}</td><td>{el[2]}</td><td>{el[3]}</td><td>{el[4]}</td><td>{el[5]}</td></tr>);
+                })}
+              </tbody>
             </Table>
           </div>
-          )
+        );
       }
     }
     return (<div>Loading</div>);
@@ -327,49 +325,47 @@ class ShowStat extends Component {
 
 class AsyncApp extends Component {
   constructor(props) {
-    console.log("########### AsyncApp.constructor");
-    super(props)
-    this.handleChange = this.handleChange.bind(this)
-    this.handleRefreshClick = this.handleRefreshClick.bind(this)
+    console.log('########### AsyncApp.constructor');
+    super(props);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleRefreshClick = this.handleRefreshClick.bind(this);
   }
 
   componentDidMount() {
-    console.log("Mounted with", this.props);
-    const { dispatch, selectedSummoner } = this.props
+    console.log('Mounted with', this.props);
+    const { dispatch, selectedSummoner } = this.props;
     if (this.props.match.topicId != selectedSummoner) {
-      dispatch(selectSummoner(this.props.match.params.topicId))
-    }
-    else {
-      dispatch(fetchStatsIfNeeded(selectedSummoner))      
+      dispatch(selectSummoner(this.props.match.params.topicId));
+    } else {
+      dispatch(fetchStatsIfNeeded(selectedSummoner));
     }
   }
 
   componentDidUpdate(prevProps) {
     if (this.props.selectedSummoner !== prevProps.selectedSummoner) {
-      const { dispatch, selectedSummoner } = this.props
-      dispatch(fetchStatsIfNeeded(selectedSummoner))
+      const { dispatch, selectedSummoner } = this.props;
+      dispatch(fetchStatsIfNeeded(selectedSummoner));
     }
   }
 
   handleChange(nextSummoner) {
-    this.props.dispatch(selectSummoner(nextSummoner))
-    this.props.dispatch(fetchStatsIfNeeded(nextSummoner))
+    this.props.dispatch(selectSummoner(nextSummoner));
+    this.props.dispatch(fetchStatsIfNeeded(nextSummoner));
   }
 
   handleRefreshClick(e) {
-    e.preventDefault()
+    e.preventDefault();
 
-    const { dispatch, selectedSummoner } = this.props
-    dispatch(invalidateSummoner(selectedSummoner))
-    dispatch(fetchStatsIfNeeded(selectedSummoner))
+    const { dispatch, selectedSummoner } = this.props;
+    dispatch(invalidateSummoner(selectedSummoner));
+    dispatch(fetchStatsIfNeeded(selectedSummoner));
   }
 
   render() {
-    const { selectedSummoner, stats, isFetching, lastUpdated } = this.props
+    const { selectedSummoner, stats, isFetching, lastUpdated } = this.props;
     return (
       <div>
-        <div
-        >{selectedSummoner}</div>
+        <h2>{selectedSummoner}</h2>
         <p>
           {lastUpdated &&
             <span>
@@ -386,7 +382,7 @@ class AsyncApp extends Component {
           <ShowStat stats={stats} match={this.props.match} />
         </div>
       </div>
-    )
+    );
   }
 }
 
@@ -395,26 +391,26 @@ AsyncApp.propTypes = {
   stats: PropTypes.array.isRequired,
   isFetching: PropTypes.bool.isRequired,
   lastUpdated: PropTypes.number,
-  dispatch: PropTypes.func.isRequired
-}
+  dispatch: PropTypes.func.isRequired,
+};
 
 function mapStateToProps(state) {
-  const { selectedSummoner, statsBySummoner } = state
+  const { selectedSummoner, statsBySummoner } = state;
   const {
     isFetching,
     lastUpdated,
-    items: stats
+    items: stats,
   } = statsBySummoner[selectedSummoner] || {
     isFetching: true,
-    items: []
-  }
+    items: [],
+  };
 
   return {
     selectedSummoner,
     stats,
     isFetching,
-    lastUpdated
-  }
+    lastUpdated,
+  };
 }
 
 export default connect(mapStateToProps)(AsyncApp);

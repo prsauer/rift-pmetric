@@ -1,17 +1,17 @@
-import { combineReducers } from 'redux'
+import { combineReducers } from 'redux';
 import {
   SELECT_SUMMONER,
   INVALIDATE_SUMMONER,
   REQUEST_STATS,
-  RECEIVE_STATS
-} from './actions/actions'
+  RECEIVE_STATS,
+} from './actions/actions';
 
 function selectedSummoner(state = '', action) {
   switch (action.type) {
     case SELECT_SUMMONER:
-      return action.summoner
+      return action.summoner;
     default:
-      return state
+      return state;
   }
 }
 
@@ -19,29 +19,29 @@ function stats(
   state = {
     isFetching: false,
     didInvalidate: false,
-    items: []
+    items: [],
   },
   action
 ) {
   switch (action.type) {
     case INVALIDATE_SUMMONER:
       return Object.assign({}, state, {
-        didInvalidate: true
-      })
+        didInvalidate: true,
+      });
     case REQUEST_STATS:
       return Object.assign({}, state, {
         isFetching: true,
-        didInvalidate: false
-      })
+        didInvalidate: false,
+      });
     case RECEIVE_STATS:
       return Object.assign({}, state, {
         isFetching: false,
         didInvalidate: false,
         items: action.stats,
-        lastUpdated: action.receivedAt
-      })
+        lastUpdated: action.receivedAt,
+      });
     default:
-      return state
+      return state;
   }
 }
 
@@ -51,16 +51,16 @@ function statsBySummoner(state = {}, action) {
     case RECEIVE_STATS:
     case REQUEST_STATS:
       return Object.assign({}, state, {
-        [action.summoner]: stats(state[action.summoner], action)
-      })
+        [action.summoner]: stats(state[action.summoner], action),
+      });
     default:
-      return state
+      return state;
   }
 }
 
 const rootReducer = combineReducers({
   statsBySummoner,
-  selectedSummoner
-})
+  selectedSummoner,
+});
 
-export default rootReducer
+export default rootReducer;
