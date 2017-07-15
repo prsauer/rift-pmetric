@@ -5,6 +5,9 @@ export default function ewAdd(x, d) {
 
 
 export function DFS(obj, path, store) {
+  // Assume '' for path means we're at the root
+  var pathString = path ? path + '.' : '';
+
   if (path.search('Id') > -1) {
     return;
   }
@@ -25,12 +28,12 @@ export function DFS(obj, path, store) {
   } else if (Array.isArray(obj)) {
     store[path] = 'array';
     for (let i = 0; i < obj.length; i++) {
-      DFS(obj[i], path + '.' + i, store);
+      DFS(obj[i], pathString + i, store);
     }
   } else if (typeof (obj) == 'object') {
     store[path] = 'object';
     for (let i = 0; i < Object.keys(obj).length; i++) {
-      DFS(obj[Object.keys(obj)[i]], path + '.' + Object.keys(obj)[i], store);
+      DFS(obj[Object.keys(obj)[i]], pathString + Object.keys(obj)[i], store);
     }
   } else if (typeof (obj) == 'number') {
     store[path] = 'number';

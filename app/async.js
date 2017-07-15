@@ -36,7 +36,7 @@ class ShowStat extends Component {
     var max = -1;
     for (let i = 0; i < matches.length; i++) {
       var new_map = {};
-      DFS(matches[i], 'match', new_map);
+      DFS(matches[i], '', new_map);
       if (Object.keys(new_map).length > max) {
         mapping = new_map;
         max = Object.keys(new_map).length;
