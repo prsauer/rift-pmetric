@@ -1,3 +1,5 @@
+import { getLeafWithPath } from './trees';
+
 // Project into objects, return row-oriented
 export function getProjRWise(paths, objs) {
   var rv = [];
@@ -12,7 +14,9 @@ export function getProjRWise(paths, objs) {
     if (x < minx) {
       minx = x;
     }
-    rv.push({ x, y });
+    if (x !== undefined && y !== undefined) {
+      rv.push({ x, y });        
+    }
   }
   console.log(minx, maxx);
   return rv;

@@ -43,7 +43,7 @@ export function DFS(obj, path, store) {
 export function getLeafWithPath(obj, path) {
   var keys = path.split('.');
   var into = obj;
-  for (var i = 1; i < keys.length; i++) {
+  for (var i = 0; i < keys.length; i++) {
     if (into === undefined) {
       return undefined;
     }
