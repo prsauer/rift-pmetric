@@ -195,13 +195,15 @@ class ShowChart extends Component {
     }
     var idxs = [parsed.x, parsed.y];
     var chartData = getProjRWise(idxs, this.props.matches);
+    console.log("CHARTING", chartData);
     return (
       <div className={'my-pretty-chart-container'}>
         <VictoryChart
           theme={VictoryTheme.material}
+          scale={{x: 'time', y: 'linear'}}
         >
           <VictoryScatter
-            style={{ data: { fill: "#c43a31" } }}
+            style={{ data: { fill: '#c43a31' } }}
             size={7}
             data={
               chartData
@@ -265,62 +267,40 @@ class ShowStat extends Component {
           ]
         );
       }
-      // Prep chart views
-      var chartData = [];
-      if (this.props.match.params.xstat) {
-        var idxs = [this.props.match.params.xstat, this.props.match.params.ystat];
-        chartData = getProjRWise(idxs, matches);
-      }
     }
 
     if (this.props.stats.length > 0) {
-      if (this.props.match.params.xstat) {
-        return (
-          <div className={'my-pretty-chart-container'}>
-            <Chart
-              chartType="ScatterChart"
-              data={chartData}
-              options={{}}
-              graph_id="ScatterChart"
-              width="100%"
-              height="400px"
-              legend_toggle
-            />
-          </div>
-        );
-      } else {
-        return (
-          <div className="container">
-            <div>N: { matches.length }</div>
-            <h3>Averages</h3>
-            <Table>
-              <thead>
-                <tr>
-                  <td>Name</td>
-                  <td>Average</td>
-                  <td>Avg Win</td>
-                  <td>Avg Loss</td>
-                  <td>Corr: Win</td>
-                  <td>Δ</td>
-                </tr>
-              </thead>
-              <tbody>
-                { merged.map((el) => {
-                  return (
-                    <tr>
-                      <td>{el[0]}</td>
-                      <td>{el[1]}</td>
-                      <td>{el[2]}</td>
-                      <td>{el[3]}</td>
-                      <td>{el[4]}</td>
-                      <td>{el[5]}</td>
-                    </tr>);
-                })}
-              </tbody>
-            </Table>
-          </div>
-        );
-      }
+      return (
+        <div className="container">
+          <div>N: { matches.length }</div>
+          <h3>Averages</h3>
+          <Table>
+            <thead>
+              <tr>
+                <td>Name</td>
+                <td>Average</td>
+                <td>Avg Win</td>
+                <td>Avg Loss</td>
+                <td>Corr: Win</td>
+                <td>Δ</td>
+              </tr>
+            </thead>
+            <tbody>
+              { merged.map((el, id) => {
+                return (
+                  <tr key={el.join()}>
+                    <td>{el[0]}</td>
+                    <td>{el[1]}</td>
+                    <td>{el[2]}</td>
+                    <td>{el[3]}</td>
+                    <td>{el[4]}</td>
+                    <td>{el[5]}</td>
+                  </tr>);
+              })}
+            </tbody>
+          </Table>
+        </div>
+      );
     }
     return (<div>Loading</div>);
   }
