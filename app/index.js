@@ -3,14 +3,13 @@ import React from 'react';
 import {
   BrowserRouter as Router,
   Route,
-  Link,
 } from 'react-router-dom';
 
 import { Nav, Navbar, NavItem } from 'react-bootstrap';
 
 import { Provider } from 'react-redux';
 import configureStore from './configureStore';
-import AApp from './async.js';
+import AApp from './async';
 
 const store = configureStore();
 

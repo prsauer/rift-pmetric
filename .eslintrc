@@ -1,6 +1,7 @@
 {
   "extends": ["airbnb", "fbjs"],
   "rules": {
-    "func-names": ["error", "never"]
+    "func-names": ["error", "never"],
+    "jsx-a11y/href-no-hash": "off",
   }
 }

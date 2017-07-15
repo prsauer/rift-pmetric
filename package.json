@@ -35,6 +35,7 @@
     "mongodb": "^2.2.30",
     "node-fetch": "^1.7.1",
     "promise-queue": "^2.2.3",
+    "prop-types": "^15.5.10",
     "react": "^15.6.1",
     "react-bootstrap": "^0.31.0",
     "react-dom": "^15.6.1",

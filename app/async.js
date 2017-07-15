@@ -1,21 +1,17 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+
+import { Chart } from 'react-google-charts';
+import { Table } from 'react-bootstrap';
+
 import {
   selectSummoner,
   fetchStatsIfNeeded,
   invalidateSummoner,
 } from './actions/actions';
-import { withRouter } from 'react-router-dom';
 
-import { Chart } from 'react-google-charts';
-import { Table } from 'react-bootstrap';
-
-import { sum, mean, pbCorr, stdev } from './stats';
-
-function ewAdd(x, d) {
-  return x.map((el) => el + d);
-}
+import { pbCorr } from './stats';
 
 function DFS(obj, path, store) {
   if (path.search('Id') > -1) {

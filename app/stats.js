@@ -1,3 +1,4 @@
+import { ewAdd } from './obj';
 
 export function sum(x) {
   var s = 0;
