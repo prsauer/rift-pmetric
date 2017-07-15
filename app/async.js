@@ -266,6 +266,7 @@ class ShowStat extends Component {
             Math.round((w_data - l_data) * 10) / 10.0,
           ]
         );
+        merged = merged.filter((el) => (Math.abs(el[4]) > 0.3));
       }
     }
 
