@@ -8,22 +8,7 @@ export function fLoss(matches) {
 
 export function fRole(matches, role) {
   //""
+  // Participant's role (Legal values: DUO, NONE, SOLO, DUO_CARRY, DUO_SUPPORT)
+  // Participant's lane (Legal values: MID, MIDDLE, TOP, JUNGLE, BOT, BOTTOM)
   return matches.filter((m) => (role == m.participant.timeline.role));
 }
-
-// function projSlice(path, objs) {
-//   var p = [];
-//   for (let i = 0; i < objs.length; i++) {
-//     p.push(getLeafWithPath(objs[i], path));
-//   }
-//   return p;
-// }
-
-// Project into objects, return column-oriented
-// function getProjCWise(paths, objs) {
-//   var rv = {};
-//   for (let i = 0; i < paths.length; i++) {
-//     rv[paths[i]] = projSlice(paths[i], objs);
-//   }
-//   return rv;
-// }

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-import { Table } from 'react-bootstrap';
+import { Table, Button } from 'react-bootstrap';
 
 import {
   Route,
@@ -13,6 +13,7 @@ import {
   fetchStatsIfNeeded,
   invalidateSummoner,
   filterData,
+  updateFilter,
 } from './actions/actions';
 
 import { averagesForNumbers, pCorrForNumbers } from './matchops/stats';
@@ -49,30 +50,30 @@ class ShowStat extends Component {
     var average_l = averagesForNumbers(fLoss(matches), mapping);
     var merged = [];
 
-    for (let i = 0; i < averages.length; i++) {
-      var key = averages[i][0];
-      var c_data = correlates[i];
-      var w_data = undefined;
-      var l_data = undefined;
-      if (average_w[i][0] === key) {
-        w_data = average_w[i][1];
-      }
-      if (average_l[i][0] === key) {
-        l_data = average_l[i][1];
-      }
-      merged.push(
-        [
-          key,
-          Math.round(averages[i][1] * 10) / 10.0,
-          Math.round(w_data * 10) / 10.0,
-          Math.round(l_data * 10) / 10.0,
-          Math.round(c_data * 100, -3) / 100.0,
-          Math.round((w_data - l_data) * 10) / 10.0,
-        ]
-      );
-      merged = merged.filter((el) => (Math.abs(el[4]) > 0.3));
-      merged.sort((a, b) => (Math.abs(b[4]) - Math.abs(a[4])));
-    }
+    // for (let i = 0; i < averages.length; i++) {
+    //   var key = averages[i][0];
+    //   var c_data = correlates[i];
+    //   var w_data = undefined;
+    //   var l_data = undefined;
+    //   if (average_w[i][0] === key) {
+    //     w_data = average_w[i][1];
+    //   }
+    //   if (average_l[i][0] === key) {
+    //     l_data = average_l[i][1];
+    //   }
+    //   merged.push(
+    //     [
+    //       key,
+    //       Math.round(averages[i][1] * 10) / 10.0,
+    //       Math.round(w_data * 10) / 10.0,
+    //       Math.round(l_data * 10) / 10.0,
+    //       Math.round(c_data * 100, -3) / 100.0,
+    //       Math.round((w_data - l_data) * 10) / 10.0,
+    //     ]
+    //   );
+    //   merged = merged.filter((el) => (Math.abs(el[4]) > 0.3));
+    //   merged.sort((a, b) => (Math.abs(b[4]) - Math.abs(a[4])));
+    // }
 
     return (
       <div className="container">
@@ -114,6 +115,7 @@ class AsyncApp extends Component {
     super(props);
     this.handleChange = this.handleChange.bind(this);
     this.handleRefreshClick = this.handleRefreshClick.bind(this);
+    this.handleFilterClick = this.handleFilterClick.bind(this);
   }
 
   componentDidMount() {
@@ -147,10 +149,20 @@ class AsyncApp extends Component {
     dispatch(fetchStatsIfNeeded(selectedSummoner));
   }
 
+  handleFilterClick(role) {
+    setTimeout(() => this.props.dispatch(updateFilter({role})), 0);
+  }
+
   render() {
     const { selectedSummoner, stats, isFetching, lastUpdated, filteredMatchData } = this.props;
     return (
       <div>
+        <Button onClick={(e) => {e.preventDefault(); this.handleFilterClick('DUO_CARRY');}}>
+          ADC
+        </Button>
+        <Button onClick={(e) => {e.preventDefault(); this.handleFilterClick('DUO_SUPPORT');}}>
+          SUPP
+        </Button>
         <h2>{selectedSummoner}</h2>
         {
           stats[0] &&

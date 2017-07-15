@@ -1,4 +1,5 @@
 import { combineReducers } from 'redux';
+import deepcopy from 'deepcopy';
 import {
   SELECT_SUMMONER,
   INVALIDATE_SUMMONER,
@@ -8,17 +9,35 @@ import {
   LOAD_MATCHES,
 } from './actions/actions';
 
-function applyFilter(filter, matches) {
+function ff(obj, has, is, wants) {
+  //console.log(is.split('.').reduce((o, x) => o[x], obj));
+  return (
+    //has.split('.').reduce((o, x) => o[x], obj)
+    //&& 
+    (is.split('.').reduce((o, x) => o[x], obj) == wants)
+  );
+}
+
+function applyFilter(filter, rawMatches) {
+  var matches = deepcopy(rawMatches);
+  if (filter.role) {
+    matches = matches.filter((m) => 
+      ff(m, 'participant.timeline', 'participant.timeline.role', filter.role));
+  }
+  if (filter.lane) {
+    matches = matches.filter((m) => 
+      ff(m, 'participant.timeline', 'participant.timeline.lane', filter.lane));
+  }
   return matches;
 }
 
-function filteredMatchData(state = {filter: {}, matches: []}, action) {
+function filteredMatchData(state = {filter: {}, matches: [], rawMatches: []}, action) {
   switch (action.type) {
     case LOAD_MATCHES:
-      return Object.assign({}, state, { matches: action.matches });
+      return Object.assign({}, state, { matches: action.matches, rawMatches: action.matches });
     case UPDATE_FILTER:
-      var matches = applyFilter(action.filter, state.matches);
-      return Object.assign({}, { matches, filter: action.filter });
+      var matches = applyFilter(action.filter, state.rawMatches);
+      return Object.assign({}, state, { matches, filter: action.filter });
     default:
       return state;
   }
