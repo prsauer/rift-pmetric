@@ -3,22 +3,13 @@ import { getLeafWithPath } from './trees';
 // Project into objects, return row-oriented
 export function getProjRWise(paths, objs) {
   var rv = [];
-  var minx = 2499560711062;
-  var maxx = -1;
   for (let i = 0; i < objs.length; i++) {
     var x = getLeafWithPath(objs[i], paths[0]);
     var y = getLeafWithPath(objs[i], paths[1]);
-    if (x > maxx) {
-      maxx = x;
-    }
-    if (x < minx) {
-      minx = x;
-    }
     if (x !== undefined && y !== undefined) {
       rv.push({ x, y });        
     }
   }
-  console.log(minx, maxx);
   return rv;
 }
 

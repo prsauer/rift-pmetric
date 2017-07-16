@@ -6,6 +6,7 @@ import { Table, Button } from 'react-bootstrap';
 
 import {
   Route,
+  Link,
 } from 'react-router-dom';
 
 import {
@@ -19,34 +20,21 @@ import {
 import { averagesForNumbers, pCorrForNumbers } from './matchops/stats';
 import { fWins, fLoss } from './matchops/filtering';
 import { DFS } from './matchops/trees';
+import { pathToPretty } from './matchops/util';
 
 import ShowChart from './components/ShowChart';
-
+import WinLossScatter from './components/WinLossScatter';
 
 // playerTimeline.46.jungleMinionsKilled
 // playerTimeline.40.totalGold
 // participant.stats.wardsKilled
-
-function pathToPretty(path) {
-  var parts = path.split('.');
-  var pretty = [];
-  for (let i = 0; i < parts.length; i++) {
-    var piece = parts[i];
-    if (piece == 'participant') continue;
-    if (piece == 'stats') continue;
-    if (piece == 'timeline') continue;
-    if (piece == 'playerTimeline') { pretty.push('Minute '); continue; }
-    if (!isNaN(piece)) { pretty.push(piece); continue; }
-    pretty.push(piece.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()));
-  }
-  return pretty.join(' ');
-}
 
 class ShowStat extends Component {
 
   render() {
     console.log('ShowStat.render', this.props, this.state);
     var matches = this.props.matches;
+    var summonerName = this.props.summonerName;
     if (matches === []) {
       return (<div>Loading</div>);
     }
@@ -88,6 +76,7 @@ class ShowStat extends Component {
           Math.round(l_data * 10) / 10.0,
           Math.round(c_data * 100, -3) / 100.0,
           Math.round((w_data - l_data) * 10) / 10.0,
+          key,
         ]
       );
       merged = merged.filter((el) => (Math.abs(el[4]) > 0.3));
@@ -113,12 +102,12 @@ class ShowStat extends Component {
             { merged.map((el, id) => {
               return (
                 <tr key={el.join()}>
-                  <td>{el[0]}</td>
+                  <td title={el[6]}>{el[0]}</td>
                   <td>{el[1]}</td>
                   <td>{el[2]}</td>
                   <td>{el[3]}</td>
                   <td>{el[4]}</td>
-                  <td>{el[5]}</td>
+                  <td><Link to={`/summoner/${summonerName}/scatter/?x=${el[6]}`}>{el[5]}</Link></td>
                 </tr>);
             })}
           </tbody>
@@ -201,6 +190,12 @@ class AsyncApp extends Component {
             <ShowChart match={this.props} matches={filteredMatchData.matches} />
           )} />
         }
+        {
+          stats[0] &&
+          <Route exact path="/summoner/:summonerName/scatter/" render={(props) => (
+            <WinLossScatter match={this.props} matches={filteredMatchData.matches} />
+          )} />
+        }
         <p>
           {lastUpdated && false &&
             <span>
@@ -214,7 +209,7 @@ class AsyncApp extends Component {
         </p>
         {isFetching && <h2>Loading...</h2>}
         <div style={{ opacity: isFetching ? 0.5 : 1 }}>
-          <ShowStat matches={filteredMatchData.matches} match={this.props.match} />
+          <ShowStat summonerName={selectedSummoner} matches={filteredMatchData.matches} match={this.props.match} />
         </div>
       </div>
     );
