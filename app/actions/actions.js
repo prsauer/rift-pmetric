@@ -7,6 +7,7 @@ export const INVALIDATE_SUMMONER = 'INVALIDATE_SUMMONERT';
 
 export const LOAD_MATCHES = 'LOAD_MATCHES';
 export const UPDATE_FILTER = 'UPDATE_FILTER';
+export const START_FILTER_UPDATE = 'START_FILTER_UPDATE';
 
 export function updateFilter(filter) {
   return {
@@ -43,6 +44,12 @@ function requestStats(summoner) {
   };
 }
 
+function startFilterUpdate() {
+  return {
+    type: START_FILTER_UPDATE,
+  };
+}
+
 function receiveStats(summoner, json) {
   return {
     type: RECEIVE_STATS,
@@ -54,7 +61,8 @@ function receiveStats(summoner, json) {
 
 export function filterData(filter) {
   return dispatch => {
-    dispatch(updateFilter(filter));
+    dispatch(startFilterUpdate());
+    setTimeout(() => dispatch(updateFilter(filter)), 0);
   };
 }
 

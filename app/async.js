@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-import { Table, Button } from 'react-bootstrap';
+import { Table, Button, Col } from 'react-bootstrap';
 
 import {
   Route,
@@ -14,20 +14,10 @@ import {
   fetchStatsIfNeeded,
   invalidateSummoner,
   filterData,
-  updateFilter,
 } from './actions/actions';
-
-import { averagesForNumbers, pCorrForNumbers } from './matchops/stats';
-import { fWins, fLoss } from './matchops/filtering';
-import { DFS } from './matchops/trees';
-import { pathToPretty } from './matchops/util';
 
 import ShowChart from './components/ShowChart';
 import WinLossScatter from './components/WinLossScatter';
-
-// playerTimeline.46.jungleMinionsKilled
-// playerTimeline.40.totalGold
-// participant.stats.wardsKilled
 
 class ShowStat extends Component {
 
@@ -38,51 +28,6 @@ class ShowStat extends Component {
     if (matches === []) {
       return (<div>Loading</div>);
     }
-
-    var mapping = {};
-    // Find best mapping
-    var max = -1;
-    for (let i = 0; i < matches.length; i++) {
-      var new_map = {};
-      DFS(matches[i], '', new_map);
-      if (Object.keys(new_map).length > max) {
-        mapping = new_map;
-        max = Object.keys(new_map).length;
-      }
-    }
-    console.log('Map', mapping);
-    var averages = averagesForNumbers(matches, mapping);
-    var correlates = pCorrForNumbers(matches, mapping);
-    var average_w = averagesForNumbers(fWins(matches), mapping);
-    var average_l = averagesForNumbers(fLoss(matches), mapping);
-    var merged = [];
-
-    for (let i = 0; i < averages.length; i++) {
-      var key = averages[i][0];
-      var c_data = correlates[i];
-      var w_data = undefined;
-      var l_data = undefined;
-      if (average_w[i][0] === key) {
-        w_data = average_w[i][1];
-      }
-      if (average_l[i][0] === key) {
-        l_data = average_l[i][1];
-      }
-      merged.push(
-        [
-          pathToPretty(key),
-          Math.round(averages[i][1] * 10) / 10.0,
-          Math.round(w_data * 10) / 10.0,
-          Math.round(l_data * 10) / 10.0,
-          Math.round(c_data * 100, -3) / 100.0,
-          Math.round((w_data - l_data) * 10) / 10.0,
-          key,
-        ]
-      );
-      merged = merged.filter((el) => (Math.abs(el[4]) > 0.3));
-      merged.sort((a, b) => (Math.abs(b[4]) - Math.abs(a[4])));
-    }
-
     return (
       <div className="container">
         <div>{ matches.length } games represented.</div>
@@ -99,7 +44,7 @@ class ShowStat extends Component {
             </tr>
           </thead>
           <tbody>
-            { merged.map((el, id) => {
+            { this.props.merged && this.props.merged.map((el, id) => {
               return (
                 <tr key={el.join()}>
                   <td title={el[6]}>{el[0]}</td>
@@ -159,12 +104,13 @@ class AsyncApp extends Component {
 
   handleFilterClick(filter) {
     setTimeout(
-      () => this.props.dispatch(updateFilter(filter)),
+      () => this.props.dispatch(filterData(filter)),
       500
     );
   }
 
   render() {
+    console.log('AsyncApp.render', this.props);
     const { selectedSummoner, stats, isFetching, lastUpdated, filteredMatchData } = this.props;
     return (
       <div>
@@ -187,13 +133,13 @@ class AsyncApp extends Component {
         {
           stats[0] &&
           <Route exact path="/summoner/:summonerName/" render={(props) => (
-            <ShowChart match={this.props} matches={filteredMatchData.matches} />
+            <Col md={12}><ShowChart match={this.props} matches={filteredMatchData.matches} /></Col>
           )} />
         }
         {
           stats[0] &&
           <Route exact path="/summoner/:summonerName/scatter/" render={(props) => (
-            <WinLossScatter match={this.props} matches={filteredMatchData.matches} />
+            <Col md={12}><WinLossScatter match={this.props} matches={filteredMatchData.matches} /></Col>
           )} />
         }
         <p>
@@ -207,9 +153,14 @@ class AsyncApp extends Component {
               Refresh
             </a>}
         </p>
-        {isFetching && <h2>Loading...</h2>}
-        <div style={{ opacity: isFetching ? 0.5 : 1 }}>
-          <ShowStat summonerName={selectedSummoner} matches={filteredMatchData.matches} match={this.props.match} />
+        {!filteredMatchData.ready && <h2>Loading...</h2>}
+        <div style={{ opacity: filteredMatchData.ready ? 1 : 0.5 }}>
+          <ShowStat
+            summonerName={selectedSummoner}
+            matches={filteredMatchData.matches}
+            match={this.props.match}
+            merged={filteredMatchData.merged}
+          />
         </div>
       </div>
     );
@@ -225,7 +176,7 @@ AsyncApp.propTypes = {
 };
 
 function mapStateToProps(state) {
-  const { selectedSummoner, statsBySummoner, filteredMatchData } = state;
+  const { selectedSummoner, statsBySummoner, filteredMatchData, merged, mapping } = state;
   const {
     isFetching,
     lastUpdated,
@@ -241,6 +192,8 @@ function mapStateToProps(state) {
     isFetching,
     lastUpdated,
     filteredMatchData,
+    mapping,
+    merged,
   };
 }
 
