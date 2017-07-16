@@ -50,44 +50,44 @@ class ShowStat extends Component {
     var average_l = averagesForNumbers(fLoss(matches), mapping);
     var merged = [];
 
-    // for (let i = 0; i < averages.length; i++) {
-    //   var key = averages[i][0];
-    //   var c_data = correlates[i];
-    //   var w_data = undefined;
-    //   var l_data = undefined;
-    //   if (average_w[i][0] === key) {
-    //     w_data = average_w[i][1];
-    //   }
-    //   if (average_l[i][0] === key) {
-    //     l_data = average_l[i][1];
-    //   }
-    //   merged.push(
-    //     [
-    //       key,
-    //       Math.round(averages[i][1] * 10) / 10.0,
-    //       Math.round(w_data * 10) / 10.0,
-    //       Math.round(l_data * 10) / 10.0,
-    //       Math.round(c_data * 100, -3) / 100.0,
-    //       Math.round((w_data - l_data) * 10) / 10.0,
-    //     ]
-    //   );
-    //   merged = merged.filter((el) => (Math.abs(el[4]) > 0.3));
-    //   merged.sort((a, b) => (Math.abs(b[4]) - Math.abs(a[4])));
-    // }
+    for (let i = 0; i < averages.length; i++) {
+      var key = averages[i][0];
+      var c_data = correlates[i];
+      var w_data = undefined;
+      var l_data = undefined;
+      if (average_w[i][0] === key) {
+        w_data = average_w[i][1];
+      }
+      if (average_l[i][0] === key) {
+        l_data = average_l[i][1];
+      }
+      merged.push(
+        [
+          key,
+          Math.round(averages[i][1] * 10) / 10.0,
+          Math.round(w_data * 10) / 10.0,
+          Math.round(l_data * 10) / 10.0,
+          Math.round(c_data * 100, -3) / 100.0,
+          Math.round((w_data - l_data) * 10) / 10.0,
+        ]
+      );
+      merged = merged.filter((el) => (Math.abs(el[4]) > 0.3));
+      merged.sort((a, b) => (Math.abs(b[4]) - Math.abs(a[4])));
+    }
 
     return (
       <div className="container">
-        <div>N: { matches.length }</div>
-        <h3>Averages</h3>
+        <div>{ matches.length } games represented.</div>
+        <h3>Statistics for Ranked 2017</h3>
         <Table>
           <thead>
             <tr>
-              <td>Name</td>
-              <td>Average</td>
-              <td>Avg Win</td>
-              <td>Avg Loss</td>
-              <td>Corr: Win</td>
-              <td>Δ</td>
+              <td>Metric</td>
+              <td title="Average over all matches">μ</td>
+              <td title="Average value on a Win">μ<sub>win</sub></td>
+              <td title="Average value on a Loss">μ<sub>loss</sub></td>
+              <td title="Correlation to Winning">ρ<sub>win</sub></td>
+              <td title="Difference in average between Win and Loss">Δ</td>
             </tr>
           </thead>
           <tbody>
@@ -149,19 +149,31 @@ class AsyncApp extends Component {
     dispatch(fetchStatsIfNeeded(selectedSummoner));
   }
 
-  handleFilterClick(role) {
-    setTimeout(() => this.props.dispatch(updateFilter({role})), 0);
+  handleFilterClick(filter) {
+    setTimeout(
+      () => this.props.dispatch(updateFilter(filter)),
+      500
+    );
   }
 
   render() {
     const { selectedSummoner, stats, isFetching, lastUpdated, filteredMatchData } = this.props;
     return (
       <div>
-        <Button onClick={(e) => {e.preventDefault(); this.handleFilterClick('DUO_CARRY');}}>
+        <Button onClick={(e) => {e.preventDefault(); this.handleFilterClick({role: 'DUO_CARRY'});}}>
           ADC
         </Button>
-        <Button onClick={(e) => {e.preventDefault(); this.handleFilterClick('DUO_SUPPORT');}}>
+        <Button onClick={(e) => {e.preventDefault(); this.handleFilterClick({role: 'DUO_SUPPORT'});}}>
           SUPP
+        </Button>
+        <Button onClick={(e) => {e.preventDefault(); this.handleFilterClick({lane: 'MID'});}}>
+          MID
+        </Button>
+        <Button onClick={(e) => {e.preventDefault(); this.handleFilterClick({lane: 'TOP'});}}>
+          TOP
+        </Button>
+        <Button onClick={(e) => {e.preventDefault(); this.handleFilterClick({lane: 'JUNGLE'});}}>
+          JG
         </Button>
         <h2>{selectedSummoner}</h2>
         {
@@ -171,12 +183,12 @@ class AsyncApp extends Component {
           )} />
         }
         <p>
-          {lastUpdated &&
+          {lastUpdated && false &&
             <span>
               Last updated at {new Date(lastUpdated).toLocaleTimeString()}.
               {' '}
             </span>}
-          {!isFetching &&
+          {!isFetching && false &&
             <a href="#" onClick={this.handleRefreshClick}>
               Refresh
             </a>}

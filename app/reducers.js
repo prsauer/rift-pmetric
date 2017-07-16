@@ -19,7 +19,11 @@ function ff(obj, has, is, wants) {
 }
 
 function applyFilter(filter, rawMatches) {
-  var matches = deepcopy(rawMatches);
+  var t0 = performance.now();
+  //var matches = deepcopy(rawMatches);
+  var matches = JSON.parse(JSON.stringify(rawMatches));
+  var t1 = performance.now();
+  console.log("Copy took", t1-t0);
   if (filter.role) {
     matches = matches.filter((m) => 
       ff(m, 'participant.timeline', 'participant.timeline.role', filter.role));
