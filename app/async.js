@@ -23,6 +23,25 @@ import { DFS } from './matchops/trees';
 import ShowChart from './components/ShowChart';
 
 
+// playerTimeline.46.jungleMinionsKilled
+// playerTimeline.40.totalGold
+// participant.stats.wardsKilled
+
+function pathToPretty(path) {
+  var parts = path.split('.');
+  var pretty = [];
+  for (let i = 0; i < parts.length; i++) {
+    var piece = parts[i];
+    if (piece == 'participant') continue;
+    if (piece == 'stats') continue;
+    if (piece == 'timeline') continue;
+    if (piece == 'playerTimeline') { pretty.push('Minute '); continue; }
+    if (!isNaN(piece)) { pretty.push(piece); continue; }
+    pretty.push(piece.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()));
+  }
+  return pretty.join(' ');
+}
+
 class ShowStat extends Component {
 
   render() {
@@ -63,7 +82,7 @@ class ShowStat extends Component {
       }
       merged.push(
         [
-          key,
+          pathToPretty(key),
           Math.round(averages[i][1] * 10) / 10.0,
           Math.round(w_data * 10) / 10.0,
           Math.round(l_data * 10) / 10.0,
