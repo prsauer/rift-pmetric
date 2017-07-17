@@ -21,6 +21,9 @@ export default class WinLossScatter extends Component {
     chartData.map((el) => (el.x = el.x ? 1 : 2) );
     var winData = chartData.filter(el => el.x == 1);
     var lossData = chartData.filter(el => el.x == 2);
+    var opacityPer = 0.25 ? this.props.matches.length > 100 : 0.5;
+    opacityPer = opacityPer ? this.props.matches.length > 10 : 1.0;
+
     return (
       <div className={'my-pretty-chart-container'}>
         <h4>Win/Loss Distriubtion for { prettyName }</h4>
@@ -30,7 +33,7 @@ export default class WinLossScatter extends Component {
           domain={{x: [0, 3]}}
         >
           <VictoryScatter
-            style={{ data: { fill: '#32DF00', fillOpacity: 0.25 } }}
+            style={{ data: { fill: '#32DF00', fillOpacity: opacityPer } }}
             categories={{ x: ['Win', 'Loss'] }}
             size={4}
             data={
@@ -38,7 +41,7 @@ export default class WinLossScatter extends Component {
             }
           />
           <VictoryScatter
-            style={{ data: { fill: '#FF4848', fillOpacity: 0.25 } }}
+            style={{ data: { fill: '#FF4848', fillOpacity: opacityPer } }}
             categories={{ x: ['Win', 'Loss'] }}
             size={4}
             data={

@@ -133,43 +133,49 @@ class AsyncApp extends Component {
           JG
         </Button>
         <h2>{selectedSummoner}</h2>
-        {
-          stats[0] &&
-          <Route exact path="/summoner/:summonerName/" render={(props) => (
-            <Col md={12}><ShowChart match={this.props} matches={filteredMatchData.matches} /></Col>
-          )} />
-        }
-        {
-          stats[0] &&
-          <Route exact path="/summoner/:summonerName/scatter/" render={(props) => (
-            <Col md={12}><WinLossScatter match={this.props} matches={filteredMatchData.matches} /></Col>
-          )} />
-        }
-        {
-          stats[0] &&
-          <Route exact path="/summoner/:summonerName/progress/" render={(props) => (
-            <Col md={12}><ProgressChart match={this.props} matches={filteredMatchData.matches} /></Col>
-          )} />
-        }
-        <p>
-          {lastUpdated && false &&
-            <span>
-              Last updated at {new Date(lastUpdated).toLocaleTimeString()}.
-              {' '}
-            </span>}
-          {!isFetching && false &&
-            <a href="#" onClick={this.handleRefreshClick}>
-              Refresh
-            </a>}
-        </p>
-        {!filteredMatchData.ready && <h2>Loading...</h2>}
-        <div style={{ opacity: filteredMatchData.ready ? 1 : 0.5 }}>
-          <ShowStat
-            summonerName={selectedSummoner}
-            matches={filteredMatchData.matches}
-            match={this.props.match}
-            merged={filteredMatchData.merged}
-          />
+        <div className="container" style={{height: 350}}>
+          <Col md={3} />
+          {
+            stats[0] &&
+            <Route exact path="/summoner/:summonerName/" render={(props) => (
+              <Col md={6}><ShowChart match={this.props} matches={filteredMatchData.matches} /></Col>
+            )} />
+          }
+          {
+            stats[0] &&
+            <Route exact path="/summoner/:summonerName/scatter/" render={(props) => (
+              <Col md={6}><WinLossScatter match={this.props} matches={filteredMatchData.matches} /></Col>
+            )} />
+          }
+          {
+            stats[0] &&
+            <Route exact path="/summoner/:summonerName/progress/" render={(props) => (
+              <Col md={6}><ProgressChart match={this.props} matches={filteredMatchData.matches} /></Col>
+            )} />
+          }
+          <Col md={3} />
+          <Col md={12}>
+            <p>
+              {lastUpdated && false &&
+                <span>
+                  Last updated at {new Date(lastUpdated).toLocaleTimeString()}.
+                  {' '}
+                </span>}
+              {!isFetching && false &&
+                <a href="#" onClick={this.handleRefreshClick}>
+                  Refresh
+                </a>}
+            </p>
+            {!filteredMatchData.ready && <h2>Loading...</h2>}
+            <div style={{ opacity: filteredMatchData.ready ? 1 : 0.5 }}>
+              <ShowStat
+                summonerName={selectedSummoner}
+                matches={filteredMatchData.matches}
+                match={this.props.match}
+                merged={filteredMatchData.merged}
+              />
+            </div>
+          </Col>
         </div>
       </div>
     );
