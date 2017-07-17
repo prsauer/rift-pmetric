@@ -18,6 +18,7 @@ import {
 
 import ShowChart from './components/ShowChart';
 import WinLossScatter from './components/WinLossScatter';
+import ProgressChart from './components/ProgressChart';
 
 class ShowStat extends Component {
 
@@ -41,6 +42,7 @@ class ShowStat extends Component {
               <td title="Average value on a Loss">μ<sub>loss</sub></td>
               <td title="Correlation to Winning">ρ<sub>win</sub></td>
               <td title="Difference in average between Win and Loss">Δ</td>
+              <td title="Chart links">#</td>
             </tr>
           </thead>
           <tbody>
@@ -53,6 +55,7 @@ class ShowStat extends Component {
                   <td>{el[3]}</td>
                   <td>{el[4]}</td>
                   <td><Link to={`/summoner/${summonerName}/scatter/?x=${el[6]}`}>{el[5]}</Link></td>
+                  <td><Link to={`/summoner/${summonerName}/progress/?x=${el[6]}`}>τ</Link></td>
                 </tr>);
             })}
           </tbody>
@@ -140,6 +143,12 @@ class AsyncApp extends Component {
           stats[0] &&
           <Route exact path="/summoner/:summonerName/scatter/" render={(props) => (
             <Col md={12}><WinLossScatter match={this.props} matches={filteredMatchData.matches} /></Col>
+          )} />
+        }
+        {
+          stats[0] &&
+          <Route exact path="/summoner/:summonerName/progress/" render={(props) => (
+            <Col md={12}><ProgressChart match={this.props} matches={filteredMatchData.matches} /></Col>
           )} />
         }
         <p>
