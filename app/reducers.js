@@ -35,6 +35,10 @@ function applyFilter(filter, rawMatches) {
     matches = matches.filter((m) => 
       ff(m, 'participant.timeline', 'participant.timeline.lane', filter.lane));
   }
+  if (filter.champion) {
+    matches = matches.filter((m) => 
+      ff(m, 'participant.championId', 'participant.championId', filter.champion));
+  }
   return matches;
 }
 
