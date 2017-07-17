@@ -2,6 +2,6 @@ var rawdata = JSON.parse('{"type":"champion","format":"standAloneComplex","versi
 
 
 export const champdata = {};
-Object.keys(rawdata.data).map((el) => {
+Object.keys(rawdata.data).map(function(el) {
   champdata[rawdata.data[el].key] = rawdata.data[el];
 });
