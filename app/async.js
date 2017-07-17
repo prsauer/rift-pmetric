@@ -28,14 +28,34 @@ class ChampionIcon extends Component {
   constructor(props) {
     super(props);
     this.handleClick = this.handleClick.bind(this);
+    this.mouseEnter = this.mouseEnter.bind(this);
+    this.mouseLeave = this.mouseLeave.bind(this);
+    this.state = {size: undefined};
+    this.imageDefaultSize = 100;
+  }
+  mouseEnter() {
+    this.setState({size: this.imageDefaultSize});
+  }
+  mouseLeave() {
+    this.setState({size: undefined});
   }
   handleClick() {
     console.log('click');
     this.props.dispatch(filterData({champion: this.props.id}));
   }
   render() {
+    var size = this.state.size || Math.max(this.imageDefaultSize * this.props.size, 15);
     return (
-      <img onClick={this.handleClick} src={`https://ddragon.leagueoflegends.com/cdn/7.13.1/img/champion/${this.props.name}.png`} width={this.props.size} height={this.props.size} alt={this.props.name} />
+      <img
+        className="clickablePort"
+        onClick={this.handleClick}
+        onMouseEnter={this.mouseEnter}
+        onMouseLeave={this.mouseLeave}
+        src={`https://ddragon.leagueoflegends.com/cdn/7.13.1/img/champion/${this.props.name}.png`}
+        width={size}
+        height={size}
+        alt={this.state.size || this.props.name}
+      />
     )
   }
 }
@@ -51,7 +71,7 @@ class ShowStat extends Component {
 
   render() {
     console.log('ShowStat.render', this.props, this.state);
-    var imageSize = 40;
+    var imageSize = 100;
     var matches = this.props.matches;
     var summonerName = this.props.summonerName;
     if (matches === []) {
@@ -68,14 +88,16 @@ class ShowStat extends Component {
     console.log("Interim1", champs);
     champs = Object.values(champs).sort((a, b) => b[1] - a[1]);
     console.log("Interim2", champs);
+    var max = champs[0] ? champs[0][1] : 1;
+    console.log("MAX", max);
     champs = champs.map((e) =>
       [
         e[0],
-        Math.max(15, imageSize * Math.log(10 * (Math.max(e[1] / champs[0][1], 0.1)))),
+        Math.log10(10 * (Math.max(e[1] / max, 0.1))),
         e[2],
       ]
     );
-    console.log("OV", champs);
+    console.log("OV", champs[0]);
     return (
       <div className="container">
         <div>{ matches.length } games represented.</div>
