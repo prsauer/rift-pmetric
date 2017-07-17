@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 import { Table, Button, Col } from 'react-bootstrap';
+import { champdata } from '../api/champdata';
 
 import {
   Route,
@@ -20,19 +21,35 @@ import ShowChart from './components/ShowChart';
 import WinLossScatter from './components/WinLossScatter';
 import ProgressChart from './components/ProgressChart';
 
+
+import { getProjRWise } from './matchops/chartprep';
+
 class ShowStat extends Component {
 
   render() {
     console.log('ShowStat.render', this.props, this.state);
+    var imageSize = 40;
     var matches = this.props.matches;
     var summonerName = this.props.summonerName;
     if (matches === []) {
       return (<div>Loading</div>);
     }
+    var champs = getProjRWise(['participant.championId', 'participant.championId'], matches);
+    champs = champs.map((el) => champdata[el.x].id);
+    champs = champs.reduce((acc, curr, idx) => {
+      acc[curr] = acc[curr] ? [curr, acc[curr][1] + 1] : [curr, 1];
+      return acc;
+    }, {});
+    champs = Object.values(champs).sort((a, b) => b[1] - a[1]);
+    champs = champs.map((e) => [e[0], imageSize * Math.log(10 * (Math.max(e[1] / champs[0][1], 0.1)))]);
+    console.log("OV", champs);
     return (
       <div className="container">
         <div>{ matches.length } games represented.</div>
         <h3>Statistics for Ranked 2017</h3>
+        {
+          champs.map((data) => <img alt={data[0]} height={data[1]} width={data[1]} src={`https://ddragon.leagueoflegends.com/cdn/7.13.1/img/champion/${data[0]}.png`} />)
+        }
         <Table>
           <thead>
             <tr>
