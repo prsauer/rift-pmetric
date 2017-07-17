@@ -184,6 +184,9 @@ class AsyncApp extends Component {
         <Button onClick={(e) => {e.preventDefault(); this.handleFilterClick({lane: 'JUNGLE'});}}>
           JG
         </Button>
+        <Button onClick={(e) => {e.preventDefault(); this.handleFilterClick({});}}>
+          RESET
+        </Button>
         <h2>{selectedSummoner}</h2>
         <div className="container" style={{height: 350}}>
           <Col md={3} />
