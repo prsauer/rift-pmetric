@@ -27,7 +27,7 @@ export function DFS(obj, path, store) {
     store[path] = 'string';
   } else if (Array.isArray(obj)) {
     store[path] = 'array';
-    for (let i = 0; i < obj.length; i++) {
+    for (let i = 0; (i < obj.length && i < 40); i += 5) {
       DFS(obj[i], pathString + i, store);
     }
   } else if (typeof (obj) == 'object') {
