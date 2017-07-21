@@ -25,6 +25,9 @@ export default class ProgressChart extends Component {
     winData = getProjRWise(idxs, winData);
     lossData = getProjRWise(idxs, lossData);
 
+    var opacityPer = 0.25 ? this.props.matches.length > 100 : 0.5;
+    opacityPer = opacityPer ? this.props.matches.length > 10 : 1.0;
+
     return (
       <div className={'my-pretty-chart-container'}>
         <h4>{ prettyName } over Time</h4>
@@ -33,14 +36,14 @@ export default class ProgressChart extends Component {
           scale={{x: 'time', y: 'linear'}}
         >
           <VictoryScatter
-            style={{ data: { fill: '#32DF00', fillOpacity: 0.25 } }}
+            style={{ data: { fill: '#32DF00', fillOpacity: opacityPer } }}
             size={4}
             data={
               winData
             }
           />
           <VictoryScatter
-            style={{ data: { fill: '#FF4848', fillOpacity: 0.25 } }}
+            style={{ data: { fill: '#FF4848', fillOpacity: opacityPer } }}
             size={4}
             data={
               lossData

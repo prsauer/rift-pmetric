@@ -3,12 +3,12 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 import { Table, Button, Col } from 'react-bootstrap';
-import { champdata } from '../api/champdata';
-
 import {
   Route,
   Link,
 } from 'react-router-dom';
+
+import { champdata } from '../api/champdata';
 
 import {
   selectSummoner,
