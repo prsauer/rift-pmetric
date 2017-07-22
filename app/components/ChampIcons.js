@@ -35,7 +35,7 @@ class ChampionIcon extends Component {
     var size = Math.max(this.imageDefaultSize * this.props.size, 45);
 
     return (
-      <span style={{ position: 'relative', width: size }} >
+      <span style={{ position: 'relative', width: size, height: size, display: 'inline-block', opacity: this.state.opac || this.props.opacity}} >
         <img
           className="clickablePort"
           onClick={this.handleClick}
@@ -45,9 +45,8 @@ class ChampionIcon extends Component {
           width={size}
           height={size}
           alt={`${this.props.name} - ${this.props.numberOfGames} games`}
-          style={{opacity: this.state.opac || this.props.opacity}}
         />
-        <p style={{position: 'absolute', top: 0, left: 10 }}>{ this.props.numberOfGames }</p>
+        <p style={{position: 'absolute', top: 0, left: 5 }}>{ this.props.numberOfGames }</p>
       </span>
     )
   }
