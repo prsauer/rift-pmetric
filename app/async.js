@@ -8,7 +8,6 @@ import {
   Link,
 } from 'react-router-dom';
 
-import { champdata } from '../api/champdata';
 
 import {
   selectSummoner,
@@ -17,96 +16,24 @@ import {
   filterData,
 } from './actions/actions';
 
-import ShowChart from './components/ShowChart';
 import WinLossScatter from './components/WinLossScatter';
 import ProgressChart from './components/ProgressChart';
 
-
-import { getProjRWise } from './matchops/chartprep';
-
-class ChampionIcon extends Component {
-  constructor(props) {
-    super(props);
-    this.handleClick = this.handleClick.bind(this);
-    this.mouseEnter = this.mouseEnter.bind(this);
-    this.mouseLeave = this.mouseLeave.bind(this);
-    this.state = {size: undefined};
-    this.imageDefaultSize = 100;
-  }
-  mouseEnter() {
-    this.setState({size: this.imageDefaultSize});
-  }
-  mouseLeave() {
-    this.setState({size: undefined});
-  }
-  handleClick() {
-    console.log('click');
-    this.props.dispatch(filterData({champion: this.props.id}));
-  }
-  render() {
-    var size = this.state.size || Math.max(this.imageDefaultSize * this.props.size, 15);
-    return (
-      <img
-        className="clickablePort"
-        onClick={this.handleClick}
-        onMouseEnter={this.mouseEnter}
-        onMouseLeave={this.mouseLeave}
-        src={`https://ddragon.leagueoflegends.com/cdn/7.13.1/img/champion/${this.props.name}.png`}
-        width={size}
-        height={size}
-        alt={this.state.size || this.props.name}
-      />
-    )
-  }
-}
-function mapSP(state) {
-  return {
-    filteredMatchData: state.filteredMatchData,
-  };
-}
-
-ChampionIcon = connect(mapSP)(ChampionIcon);
+import ChampIcons from './components/ChampIcons';
 
 class ShowStat extends Component {
 
   render() {
     console.log('ShowStat.render', this.props, this.state);
-    var imageSize = 100;
     var matches = this.props.matches;
     var summonerName = this.props.summonerName;
     if (matches === []) {
       return (<div>Loading</div>);
     }
-    var champs = getProjRWise(['participant.championId', 'participant.championId'], matches);
-    champs = champs.map((el) => [champdata[el.x].id, el.x]);
-    console.log("Interim", champs);
-    champs = champs.reduce((acc, curr, idx) => {
-      let cname = curr[0];
-      acc[curr[0]] = acc[cname] ? [cname, acc[cname][1] + 1, curr[1]] : [cname, 1, curr[1]];
-      return acc;
-    }, {});
-    console.log("Interim1", champs);
-    champs = Object.values(champs).sort((a, b) => b[1] - a[1]);
-    console.log("Interim2", champs);
-    var max = champs[0] ? champs[0][1] : 1;
-    console.log("MAX", max);
-    champs = champs.map((e) =>
-      [
-        e[0],
-        Math.log10(10 * (Math.max(e[1] / max, 0.1))),
-        e[2],
-      ]
-    );
-    console.log("OV", champs[0]);
+
     return (
-      <div className="container">
-        <div>{ matches.length } games represented.</div>
-        <h3>Statistics for Ranked 2017</h3>
-        {
-          champs.map((data) =>
-            <ChampionIcon name={data[0]} size={data[1]} id={data[2]} />
-          )
-        }
+      <div>
+        <h3>Statistics for Ranked 2017. { matches.length } games.</h3>
         <Table>
           <thead>
             <tr>
@@ -211,26 +138,28 @@ class AsyncApp extends Component {
         </Button>
         <h2>{selectedSummoner}</h2>
         <div className="container" style={{height: 350}}>
-          <Col md={3} />
-          {
-            stats[0] &&
-            <Route exact path="/summoner/:summonerName/" render={(props) => (
-              <Col md={6}><ShowChart match={this.props} matches={filteredMatchData.matches} /></Col>
-            )} />
-          }
+          <Col md={4}>
+            <ChampIcons
+              matches={filteredMatchData.rawMatches}
+              filter={filteredMatchData.filter}
+            />
+          </Col>
           {
             stats[0] &&
             <Route exact path="/summoner/:summonerName/scatter/" render={(props) => (
-              <Col md={6}><WinLossScatter match={this.props} matches={filteredMatchData.matches} /></Col>
+              <Col md={8}><WinLossScatter match={this.props} matches={filteredMatchData.matches} /></Col>
             )} />
           }
           {
             stats[0] &&
             <Route exact path="/summoner/:summonerName/progress/" render={(props) => (
-              <Col md={6}><ProgressChart match={this.props} matches={filteredMatchData.matches} /></Col>
+              <Col md={8}><ProgressChart match={this.props} matches={filteredMatchData.matches} /></Col>
             )} />
           }
-          <Col md={3} />
+          {
+            !stats[0] &&
+            <Col md={8}>Empty</Col>
+          }
           <Col md={12}>
             <p>
               {lastUpdated && false &&
@@ -243,16 +172,18 @@ class AsyncApp extends Component {
                   Refresh
                 </a>}
             </p>
-            {!filteredMatchData.ready && <h2>Loading...</h2>}
-            <div style={{ opacity: filteredMatchData.ready ? 1 : 0.5 }}>
+          </Col>
+          {!filteredMatchData.ready && <h2>Loading...</h2>}
+          <div style={{ opacity: filteredMatchData.ready ? 1 : 0.5 }}>
+            <Col md={12}>
               <ShowStat
                 summonerName={selectedSummoner}
                 matches={filteredMatchData.matches}
                 match={this.props.match}
                 merged={filteredMatchData.merged}
               />
-            </div>
-          </Col>
+            </Col>
+          </div>
         </div>
       </div>
     );

@@ -21,8 +21,8 @@ export default class WinLossScatter extends Component {
     chartData.map((el) => (el.x = el.x ? 1 : 2) );
     var winData = chartData.filter(el => el.x == 1);
     var lossData = chartData.filter(el => el.x == 2);
-    var opacityPer = 0.25 ? this.props.matches.length > 100 : 0.5;
-    opacityPer = opacityPer ? this.props.matches.length > 10 : 1.0;
+    var opacityPer = this.props.matches.length > 100 ? 0.15 : 0.5;
+    opacityPer = this.props.matches.length > 10 ? opacityPer : 1.0;
 
     return (
       <div className={'my-pretty-chart-container'}>
@@ -48,8 +48,7 @@ export default class WinLossScatter extends Component {
               lossData
             }
           />
-        </VictoryChart>    
-        <Link to={`/summoner/${this.props.match.selectedSummoner}`}>Close chart</Link>    
+        </VictoryChart>
       </div>
     );
   }

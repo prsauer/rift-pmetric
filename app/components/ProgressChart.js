@@ -11,7 +11,6 @@ import { pathToPretty } from '../matchops/util';
 export default class ProgressChart extends Component {
   render() {
     var matches = this.props.matches;
-    console.log('ProgressChart.render', this.props);
     const parsed = queryString.parse(this.props.match.location.search);
     if (parsed.x == undefined ) {
       return (null);
@@ -25,8 +24,8 @@ export default class ProgressChart extends Component {
     winData = getProjRWise(idxs, winData);
     lossData = getProjRWise(idxs, lossData);
 
-    var opacityPer = 0.25 ? this.props.matches.length > 100 : 0.5;
-    opacityPer = opacityPer ? this.props.matches.length > 10 : 1.0;
+    var opacityPer = this.props.matches.length > 100 ? 0.5 : 0.75;
+    opacityPer = this.props.matches.length > 10 ? opacityPer : 1.0;
 
     return (
       <div className={'my-pretty-chart-container'}>
@@ -49,8 +48,7 @@ export default class ProgressChart extends Component {
               lossData
             }
           />
-        </VictoryChart>    
-        <Link to={`/summoner/${this.props.match.selectedSummoner}`}>Close chart</Link>    
+        </VictoryChart>
       </div>
     );
   }
