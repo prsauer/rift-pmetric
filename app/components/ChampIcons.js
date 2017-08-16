@@ -41,7 +41,7 @@ class ChampionIcon extends Component {
           onClick={this.handleClick}
           onMouseEnter={this.mouseEnter}
           onMouseLeave={this.mouseLeave}
-          src={`https://ddragon.leagueoflegends.com/cdn/7.13.1/img/champion/${this.props.name}.png`}
+          src={`https://ddragon.leagueoflegends.com/cdn/7.16.1/img/champion/${this.props.name}.png`}
           width={size}
           height={size}
           alt={`${this.props.name} - ${this.props.numberOfGames} games`}

@@ -43,19 +43,18 @@ function fetchData(matchId) {
     }
     if (items.length == 0) {
       return Promise.all([api.getMatchData(matchId), api.getMatchTimeline(matchId)])
-          .then((matchData) => {
-            matchData[0].timeline = matchData[1]
-            if(!err) {
-              matches.insert( matchData[0], {w:1}, function(err, result) {
-                if (err) {
-                  console.log(err.name, err.message, err.code, err.errmsg);
-                }
-                sleep.msleep(1200);
-              });
-            }
-            else {
-              console.log("DatabaseError", err);
-            }
+        .then((matchData) => {
+          matchData[0].timeline = matchData[1]
+          if (!err) {
+            matches.insert( matchData[0], {w:1}, function(err, result) {
+              if (err) {
+                console.log(err.name, err.message, err.code, err.errmsg);
+              }
+              sleep.msleep(1200);
+            });
+          } else {
+            console.log("DatabaseError", err);
+          }
         });
     }
     else {
@@ -68,9 +67,9 @@ function onPlayerNamed(name) {
   console.log('PlayerNamed:', name);
   return api.getSummonerId(name)
     .then((accountId) => {
-        return api.getRecentMatchIds(accountId);
+      return api.getRecentMatchIds(accountId);
     }).then((matchIds) => {
-      for(var i = 0; i < matchIds.length; i++) { //matchIds.length
+      for (var i = 0; i < matchIds.length; i++) { //matchIds.length
         exchange.publish(matchIds[i], { key: 'match_ids' });
       }
     });

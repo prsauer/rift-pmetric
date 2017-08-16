@@ -1,6 +1,6 @@
 var MongoClient = require('mongodb').MongoClient
 
-var MONGO_URL = process.env.MONGODB_URI;
+var MONGO_URL = 'mongodb://34.212.180.248' //process.env.MONGODB_URI;
 
 var state = {
   db: null,
